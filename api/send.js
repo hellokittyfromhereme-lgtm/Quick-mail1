@@ -13,10 +13,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
+  // Handle preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   
+  // Only POST allowed
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -24,7 +26,9 @@ export default async function handler(req, res) {
   try {
     const { license, name, from_email, to_email, subject, message } = req.body;
     
-    // ============ CHECK LICENSE FROM SUPABASE ============
+    console.log('Received request:', { license, name, from_email, to_email, subject });
+    
+    // Check license in Supabase
     const { data: licenseData, error: licenseError } = await supabase
       .from('licenses')
       .select('*')
@@ -32,12 +36,9 @@ export default async function handler(req, res) {
       .single();
     
     if (licenseError || !licenseData) {
-      console.error('License check error:', licenseError);
+      console.error('License error:', licenseError);
       return res.status(400).json({ error: '❌ Invalid license key!' });
     }
-
-// Generate tracking link with sender email
-const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email=${to_email}&license=${license}&sender=${from_email}`;
     
     // Check expiry
     const today = new Date().toISOString().split('T')[0];
@@ -50,21 +51,22 @@ const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email
       return res.status(400).json({ error: `❌ License limit reached (${licenseData.max_emails} emails)` });
     }
     
-    // ============ VALIDATE FORM FIELDS ============
+    // Validate fields
     if (!name || !from_email || !to_email || !subject || !message) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
     
+    // Validate email format
     const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
     if (!emailRegex.test(from_email) || !emailRegex.test(to_email)) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
     
-    // ============ GENERATE TRACKING LINK ============
+    // Generate tracking link
     const trackingId = Math.random().toString(36).substring(2, 15);
-    const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email=${to_email}&license=${license}`;
+    const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email=${to_email}&license=${license}&sender=${encodeURIComponent(from_email)}`;
     
-    // ============ EMAIL BODY ============
+    // Email body
     const emailBody = `
       <!DOCTYPE html>
       <html>
@@ -72,7 +74,7 @@ const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email
       <body style="font-family: Arial, sans-serif; padding: 20px;">
         <div style="max-width: 500px; margin: 0 auto;">
           <h2 style="color: #006a4e;">${message.substring(0, 50)}</h2>
-          <p>${message}</p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
           <div style="margin: 30px 0; text-align: center;">
             <a href="${trackLink}" 
                style="background: linear-gradient(135deg, #006a4e, #f42a41); 
@@ -91,7 +93,7 @@ const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email
       </html>
     `;
     
-    // ============ SEND EMAIL VIA SMTP ============
+    // Send email
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
@@ -109,22 +111,17 @@ const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email
       html: emailBody
     });
     
-    // ============ UPDATE LICENSE USAGE IN SUPABASE ============
-    const newUsedCount = (licenseData.used_count || 0) + 1;
-    const { error: updateError } = await supabase
+    // Update license usage
+    await supabase
       .from('licenses')
       .update({
-        used_count: newUsedCount,
+        used_count: (licenseData.used_count || 0) + 1,
         used_by: from_email,
         last_used: new Date().toISOString()
       })
       .eq('license_key', license);
     
-    if (updateError) {
-      console.error('Update error:', updateError);
-    }
-    
-    const remaining = licenseData.max_emails === -1 ? 'Unlimited' : (licenseData.max_emails - newUsedCount);
+    const remaining = licenseData.max_emails === -1 ? 'Unlimited' : (licenseData.max_emails - (licenseData.used_count + 1));
     
     return res.status(200).json({ 
       success: true, 
