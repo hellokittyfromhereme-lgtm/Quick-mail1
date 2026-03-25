@@ -5,11 +5,6 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-import fs from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), 'data', 'collected');
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -26,17 +21,28 @@ export default async function handler(req, res) {
   try {
     const userData = req.body;
     
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+    const { error } = await supabase
+      .from('collected_data')
+      .insert({
+        tracking_id: userData.trackingId,
+        user_email: userData.userEmail,
+        license: userData.license,
+        ip: userData.ip,
+        location: userData.location,
+        browser: userData.browser,
+        platform: userData.platform,
+        timestamp: userData.timestamp || new Date().toISOString()
+      });
     
-    const filename = `${Date.now()}_${userData.trackingId}.json`;
-    fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(userData, null, 2));
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: error.message });
+    }
     
     return res.status(200).json({ success: true });
     
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: 'Failed to save data' });
+    return res.status(500).json({ error: error.message });
   }
 }
