@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickMail - Send Email</title>
+    <title>QuickMail - Custom Email Sender</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
         .card {
@@ -48,6 +48,28 @@
             color: #006a4e;
             font-weight: bold;
         }
+        .mode-switch {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 40px;
+        }
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            color: white;
+        }
         .field {
             margin-bottom: 20px;
         }
@@ -72,28 +94,7 @@
         textarea {
             min-height: 150px;
             resize: vertical;
-            font-family: monospace;
-        }
-        .mode-switch {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            background: #f5f5f5;
-            padding: 8px;
-            border-radius: 40px;
-        }
-        .mode-btn {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        .mode-btn.active {
-            background: linear-gradient(135deg, #006a4e, #f42a41);
-            color: white;
+            font-family: 'Courier New', monospace;
         }
         button {
             width: 100%;
@@ -181,6 +182,19 @@
             font-size: 12px;
             color: #666;
             margin-top: 8px;
+            border-left: 3px solid #006a4e;
+        }
+        .html-hint code {
+            background: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .footer-field {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px dashed #ccc;
         }
         @media (max-width: 550px) {
             .card { padding: 25px; }
@@ -204,8 +218,8 @@
             </div>
 
             <div class="mode-switch">
-                <div class="mode-btn active" data-mode="text">📝 Plain Text</div>
-                <div class="mode-btn" data-mode="html">🎨 HTML / Custom</div>
+                <div class="mode-btn active" data-mode="simple">📝 Simple Mode</div>
+                <div class="mode-btn" data-mode="custom">🎨 Full HTML/CSS</div>
             </div>
 
             <form id="emailForm">
@@ -226,46 +240,92 @@
                     <label>📌 Subject *</label>
                     <input type="text" id="subject" placeholder="Email subject" required>
                 </div>
-                <div class="field">
-                    <label>💬 Message *</label>
-                    <textarea id="message" placeholder="Write your message..." required></textarea>
-                    <div class="char-count"><span id="charCount">0</span> characters</div>
-                    <div class="html-hint" id="htmlHint" style="display: none;">
-                        💡 HTML Mode: You can use any HTML/CSS. Example:<br>
-                        <code>&lt;h1 style="color:red"&gt;Hello&lt;/h1&gt;</code><br>
-                        <code>&lt;img src="https://example.com/image.jpg"&gt;</code>
+                
+                <!-- Simple Mode Fields -->
+                <div id="simpleMode">
+                    <div class="field">
+                        <label>💬 Message *</label>
+                        <textarea id="message" placeholder="Write your message here..." required></textarea>
+                        <div class="char-count"><span id="charCount">0</span> characters</div>
+                    </div>
+                    <div class="field footer-field">
+                        <label>📎 Custom Footer <span style="font-weight: normal;">(Optional - HTML allowed)</span></label>
+                        <textarea id="footer" rows="3" placeholder="Your custom footer...&#10;Example:&#10;Best regards,&#10;Hossain&#10;📞 +880 1234 567890&#10;🌐 www.mywebsite.com"></textarea>
+                        <small>You can use HTML: &lt;img&gt;, &lt;a&gt;, &lt;b&gt;, etc.</small>
                     </div>
                 </div>
+                
+                <!-- Custom HTML Mode -->
+                <div id="customMode" style="display: none;">
+                    <div class="field">
+                        <label>🎨 Complete HTML/CSS Email *</label>
+                        <textarea id="custom_html" rows="12" placeholder="&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;style&gt;
+        body { font-family: Arial; }
+        .header { background: #006a4e; color: white; padding: 20px; }
+        .content { padding: 20px; }
+        .footer { background: #f0f0f0; padding: 10px; text-align: center; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class='header'&gt;
+        &lt;h1&gt;Your Logo Here&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div class='content'&gt;
+        &lt;h2&gt;Hello!&lt;/h2&gt;
+        &lt;p&gt;Your message here...&lt;/p&gt;
+        &lt;img src='https://example.com/image.jpg' width='100%'&gt;
+    &lt;/div&gt;
+    &lt;div class='footer'&gt;
+        &lt;p&gt;Your custom footer&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;"></textarea>
+                        <div class="html-hint">
+                            💡 <strong>Full HTML/CSS Mode:</strong> You can use any HTML, CSS, images, buttons, custom colors, fonts, etc.<br>
+                            📌 <strong>Examples:</strong> 
+                            <code>&lt;img src="https://example.com/logo.png"&gt;</code> 
+                            <code>&lt;button style="background:red"&gt;Click&lt;/button&gt;</code>
+                            <code>&lt;div style="background:linear-gradient(...)"&gt;</code>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit">✈️ Send Email</button>
             </form>
             <div class="footer">
-                ⚡ No branding • Full HTML support • Made in Bangladesh
+                ⚡ 100% Customizable • Send any HTML/CSS • Made in Bangladesh
             </div>
         </div>
     </div>
 
     <script>
-        // Mode switching
-        let currentMode = 'text';
+        let currentMode = 'simple';
         
+        // Mode switching
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentMode = btn.dataset.mode;
                 
-                const htmlHint = document.getElementById('htmlHint');
-                if (currentMode === 'html') {
-                    htmlHint.style.display = 'block';
-                    document.getElementById('message').placeholder = '<h1>Your Heading</h1>\n<p>Your message with <strong>HTML</strong>...</p>\n<img src="https://example.com/image.jpg">';
+                if (currentMode === 'simple') {
+                    document.getElementById('simpleMode').style.display = 'block';
+                    document.getElementById('customMode').style.display = 'none';
+                    document.getElementById('message').required = true;
+                    document.getElementById('custom_html').required = false;
                 } else {
-                    htmlHint.style.display = 'none';
-                    document.getElementById('message').placeholder = 'Write your message here...';
+                    document.getElementById('simpleMode').style.display = 'none';
+                    document.getElementById('customMode').style.display = 'block';
+                    document.getElementById('message').required = false;
+                    document.getElementById('custom_html').required = true;
                 }
             });
         });
         
-        // Character counter
+        // Character counter for simple mode
         const messageField = document.getElementById('message');
         const charCount = document.getElementById('charCount');
         messageField.addEventListener('input', function() {
@@ -291,10 +351,31 @@
             const from_email = document.getElementById('from_email').value.trim();
             const to_email = document.getElementById('to_email').value.trim();
             const subject = document.getElementById('subject').value.trim();
-            let message = document.getElementById('message').value;
             
-            if (!name || !from_email || !to_email || !subject || !message) {
-                showToast('❌ Please fill all fields!', 'error');
+            let message, footer, use_custom;
+            
+            if (currentMode === 'simple') {
+                message = document.getElementById('message').value;
+                footer = document.getElementById('footer').value;
+                use_custom = 'false';
+                
+                if (!message) {
+                    showToast('❌ Please write a message!', 'error');
+                    return;
+                }
+            } else {
+                message = document.getElementById('custom_html').value;
+                footer = '';
+                use_custom = 'true';
+                
+                if (!message) {
+                    showToast('❌ Please write your HTML email!', 'error');
+                    return;
+                }
+            }
+            
+            if (!name || !from_email || !to_email || !subject) {
+                showToast('❌ Please fill all required fields!', 'error');
                 return;
             }
             
@@ -320,7 +401,8 @@
                         to_email, 
                         subject, 
                         message,
-                        use_html: currentMode === 'html' ? 'true' : 'false'
+                        footer,
+                        use_custom
                     })
                 });
                 
@@ -331,6 +413,9 @@
                     showToast(result.message, 'success');
                     document.getElementById('emailForm').reset();
                     charCount.textContent = '0';
+                    if (currentMode === 'simple') {
+                        document.getElementById('message').required = true;
+                    }
                 } else {
                     showToast(result.error || 'Failed to send', 'error');
                 }
