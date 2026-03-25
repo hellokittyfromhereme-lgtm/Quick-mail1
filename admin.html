@@ -51,6 +51,13 @@
             justify-content: space-between;
             align-items: center;
         }
+        .live-stats {
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-size: 14px;
+        }
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -129,6 +136,23 @@
             object-fit: cover;
         }
         .template-card .info { padding: 12px; }
+        .visitor-stats {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .visitor-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -143,7 +167,7 @@
     <div id="dashboard" class="dashboard">
         <div class="header">
             <h1>📊 QuickMail Admin Panel</h1>
-            <button onclick="logout()" style="background:#f42a41;">Logout</button>
+            <div class="live-stats" id="liveVisitorStats">👥 Live: -- visitors</div>
         </div>
 
         <div class="nav-tabs">
@@ -153,11 +177,12 @@
             <div class="tab" onclick="showTab('upload')">📤 Upload Template</div>
             <div class="tab" onclick="showTab('data')">📁 Collected Data</div>
             <div class="tab" onclick="showTab('stats')">📈 Statistics</div>
+            <div class="tab" onclick="showTab('visitors')">👥 Visitors</div>
         </div>
 
         <div id="licensesTab" class="tab-content active">
             <h3>📋 All Licenses</h3>
-            <div style="overflow-x: auto;"><table id="licensesTable"><thead><tr><th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+            <div style="overflow-x: auto;"><table id="licensesTable"><thead>(\s*<tr>)?<th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th>(\s*</tr>)?</thead><tbody></tbody></table></div>
         </div>
 
         <div id="generateTab" class="tab-content">
@@ -207,24 +232,28 @@
             <h3>📈 Statistics</h3>
             <div id="statsCards" class="stats-grid"></div>
         </div>
+
+        <div id="visitorsTab" class="tab-content">
+            <h3>👥 Visitor Statistics</h3>
+            <div class="visitor-stats" id="visitorStats">
+                <div class="visitor-card"><h3>Today</h3><div id="todayVisitors" class="stat-number">0</div></div>
+                <div class="visitor-card"><h3>This Week</h3><div id="weekVisitors" class="stat-number">0</div></div>
+                <div class="visitor-card"><h3>This Month</h3><div id="monthVisitors" class="stat-number">0</div></div>
+                <div class="visitor-card"><h3>Total All Time</h3><div id="totalVisitors" class="stat-number">0</div></div>
+            </div>
+            <div style="margin-top:20px;">
+                <h4>Recent Visitors</h4>
+                <div style="overflow-x: auto;"><table id="visitorTable"><thead><tr><th>Time</th><th>IP</th><th>Location</th><th>Page</th></tr></thead><tbody></tbody></table></div>
+            </div>
+        </div>
     </div>
 
     <script>
         let adminPassword = '';
-        function login() { const pass = document.getElementById('adminPass').value; if (pass === '##Hossain##1') { adminPassword = pass; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadAll(); } else alert('Wrong password!'); }
+        function login() { const pass = document.getElementById('adminPass').value; if (pass === '##Hossain##1') { adminPassword = pass; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadAll(); setInterval(loadLiveVisitorStats, 5000); } else alert('Wrong password!'); }
         function logout() { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('dashboard').style.display = 'none'; }
-        function showTab(tab) { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); document.getElementById(tab+'Tab').classList.add('active'); if(tab==='templates') loadTemplates(); if(tab==='data') loadCollectedData(); if(tab==='stats') loadStats(); }
-        async function loadAll() { await loadLicenses(); await loadTemplates(); await loadCollectedData(); await loadStats(); }
-        async function loadLicenses() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) }); const data = await res.json(); const tbody = document.querySelector('#licensesTable tbody'); tbody.innerHTML = ''; for(const [key,lic] of Object.entries(data.licenses)) { tbody.innerHTML += `<tr><td><code>${key}</code></td><td>${lic.type}</td><td>${lic.created?.split('T')[0]||'-'}</td><td>${lic.expiry}</td><td>${lic.max_emails===-1?'∞':lic.max_emails}</td><td>${lic.used_count||0}</td><td>${lic.used_by||'-'}</td><td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td></tr>`; } }
-        async function generateLicense() { const type = document.getElementById('licenseType').value; let days, max_emails; if(type==='Custom') { days = document.getElementById('customDays').value; max_emails = document.getElementById('customMaxEmails').value; } else { const p = { 'Trial':[7,10], 'Monthly':[30,100], 'Premium':[90,500], 'Pro':[180,2000], 'Lifetime':[365,'unlimited'] }; [days,max_emails] = p[type]; } const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'generate', password:adminPassword, licenseData:{ days, max_emails, type } }) }); const result = await res.json(); if(result.success) { document.getElementById('licenseKeyDisplay').innerText = result.licenseKey; document.getElementById('newLicense').style.display = 'block'; loadLicenses(); } }
-        async function deleteLicense(key) { if(confirm('Delete?')) { await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'delete', password:adminPassword, licenseData:{ licenseKey:key } }) }); loadLicenses(); } }
-        async function loadTemplates() { const res = await fetch('/api/templates'); const templates = await res.json(); const grid = document.getElementById('templatesGrid'); grid.innerHTML = ''; for(const [cat, items] of Object.entries(templates)) { for(const t of items) { grid.innerHTML += `<div class="template-card"><img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'"><div class="info"><h4>${t.name}</h4><p>${t.title}</p><small>${cat}</small>${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${cat}','${t.id}')">Delete</button>` : ''}</div></div>`; } } }
-        async function deleteTemplate(cat,id) { if(confirm('Delete template?')) { await fetch('/api/templates', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ category:cat, id, password:adminPassword }) }); loadTemplates(); } }
-        async function uploadTemplate() { const fd = new FormData(); fd.append('name', document.getElementById('templateName').value); fd.append('category', document.getElementById('templateCategory').value); fd.append('title', document.getElementById('templateTitle').value); fd.append('html', document.getElementById('templateHtml').value); fd.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v=>v.trim()))); fd.append('password', adminPassword); const img = document.getElementById('templateImage').files[0]; if(img) fd.append('image', img); const res = await fetch('/api/templates', { method:'POST', body:fd }); const result = await res.json(); if(result.success) { alert('Template uploaded!'); loadTemplates(); } else alert('Upload failed'); }
-        async function loadCollectedData() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'getData', password:adminPassword }) }); const result = await res.json(); const tbody = document.querySelector('#dataTable tbody'); tbody.innerHTML = ''; if(result.data) { for(const item of result.data.slice(0,50)) { tbody.innerHTML += `<tr><td>${new Date(item.timestamp).toLocaleString()}</td><td>${item.userEmail||'-'}</td><td>${item.ip||'-'}</td><td>${item.location?.city||'-'}, ${item.location?.country||'-'}</td><td>${item.browser?.substring(0,40)||'-'}</td><td>${item.license||'-'}</td></tr>`; } } }
-        async function loadStats() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) }); const licenses = await res.json(); const dataRes = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'getData', password:adminPassword }) }); const collected = await dataRes.json(); let total=0, active=0, sent=0; for(const lic of Object.values(licenses.licenses)) { total++; if(lic.expiry >= new Date().toISOString().split('T')[0]) active++; sent += lic.used_count||0; } document.getElementById('statsCards').innerHTML = `<div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div><div class="stat-card"><div class="stat-number">${active}</div><div>Active</div></div><div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div><div class="stat-card"><div class="stat-number">${collected.data?.length||0}</div><div>Users Tracked</div></div>`; }
-        function copyLicense() { navigator.clipboard.writeText(document.getElementById('licenseKeyDisplay').innerText); alert('Copied!'); }
-        document.getElementById('licenseType').addEventListener('change', function() { document.getElementById('customFields').style.display = this.value === 'Custom' ? 'block' : 'none'; });
-    </script>
-</body>
-</html>
+        function showTab(tab) { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); document.getElementById(tab+'Tab').classList.add('active'); if(tab==='templates') loadTemplates(); if(tab==='data') loadCollectedData(); if(tab==='stats') loadStats(); if(tab==='visitors') loadVisitors(); }
+        
+        async function loadAll() { await loadLicenses(); await loadTemplates(); await loadCollectedData(); await loadStats(); await loadVisitors(); await loadLiveVisitorStats(); }
+        
+        async function loadLicenses() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) }); const data = await res.json(); const tbody = document.querySelector('#licensesTable tbody'); tbody.innerHTML = ''; for(const [key,lic] of Object.entries(data.licenses)) { tbody.innerHTML += `<tr><td><code>${key}</code></td><td>${lic.type}</td><td>${lic.created?.split('T')[0]||'-'}</td><td>${lic.expiry}</td><td>${lic.max_emails===-1?'∞':lic.max_emails}</td><td>${lic.used_count||0}</td><td>${lic.used_by||'-'}</td><td><button class="delete-btn" onclick="deleteLicense('${
