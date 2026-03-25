@@ -35,6 +35,9 @@ export default async function handler(req, res) {
       console.error('License check error:', licenseError);
       return res.status(400).json({ error: '❌ Invalid license key!' });
     }
+
+// Generate tracking link with sender email
+const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email=${to_email}&license=${license}&sender=${from_email}`;
     
     // Check expiry
     const today = new Date().toISOString().split('T')[0];
