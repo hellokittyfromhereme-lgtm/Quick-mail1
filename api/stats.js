@@ -5,32 +5,46 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-import fs from 'fs';
-import path from 'path';
-
-const LICENSE_FILE = path.join(process.cwd(), 'data', 'licenses.json');
-const COLLECTED_DIR = path.join(process.cwd(), 'data', 'collected');
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  
   try {
-    let licenses = {};
-    if (fs.existsSync(LICENSE_FILE)) licenses = JSON.parse(fs.readFileSync(LICENSE_FILE));
-    let totalEmails = 0, activeLicenses = 0;
+    // Get licenses count
+    const { count: totalLicenses } = await supabase
+      .from('licenses')
+      .select('*', { count: 'exact', head: true });
+    
+    // Get active licenses
     const today = new Date().toISOString().split('T')[0];
-    for (const lic of Object.values(licenses)) {
+    const { count: activeLicenses } = await supabase
+      .from('licenses')
+      .select('*', { count: 'exact', head: true })
+      .gte('expiry', today);
+    
+    // Get total emails sent
+    const { data: licenses } = await supabase
+      .from('licenses')
+      .select('used_count');
+    
+    let totalEmails = 0;
+    for (const lic of licenses || []) {
       totalEmails += lic.used_count || 0;
-      if (lic.expiry >= today) activeLicenses++;
     }
-    let totalUsers = 0;
-    if (fs.existsSync(COLLECTED_DIR)) totalUsers = fs.readdirSync(COLLECTED_DIR).length;
+    
+    // Get total users
+    const { count: totalUsers } = await supabase
+      .from('collected_data')
+      .select('*', { count: 'exact', head: true });
+    
     return res.status(200).json({
-      totalLicenses: Object.keys(licenses).length,
-      activeLicenses,
-      totalEmails,
-      totalUsers
+      totalLicenses: totalLicenses || 0,
+      activeLicenses: activeLicenses || 0,
+      totalEmails: totalEmails,
+      totalUsers: totalUsers || 0
     });
+    
   } catch (error) {
-    return res.status(500).json({ error: 'Failed' });
+    console.error('Stats error:', error);
+    return res.status(500).json({ error: error.message });
   }
 }
