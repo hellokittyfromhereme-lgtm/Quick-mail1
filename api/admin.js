@@ -5,22 +5,14 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const LICENSE_FILE = path.join(DATA_DIR, 'licenses.json');
 const COLLECTED_DIR = path.join(DATA_DIR, 'collected');
 
-// Ensure directories exist
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(LICENSE_FILE)) fs.writeFileSync(LICENSE_FILE, JSON.stringify({}));
 if (!fs.existsSync(COLLECTED_DIR)) fs.mkdirSync(COLLECTED_DIR, { recursive: true });
 
-// Admin password - only you know
 const ADMIN_PASSWORD = '##Hossain##1';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -28,15 +20,12 @@ export default async function handler(req, res) {
   
   const { action, password, licenseData } = req.body;
   
-  // Verify admin password
   if (password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   
-  // Generate new license
   if (action === 'generate') {
     const { days, max_emails, type } = licenseData;
-    
     const licenseKey = 'KEYMAIL-' + Math.random().toString(36).substring(2, 10).toUpperCase() + 
                        '-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     
@@ -65,13 +54,11 @@ export default async function handler(req, res) {
     });
   }
   
-  // Get all licenses
   if (action === 'list') {
     const licenses = JSON.parse(fs.readFileSync(LICENSE_FILE));
     return res.status(200).json({ licenses });
   }
   
-  // Delete license
   if (action === 'delete') {
     const { licenseKey } = licenseData;
     const licenses = JSON.parse(fs.readFileSync(LICENSE_FILE));
@@ -80,16 +67,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
   
-  // Get collected data
   if (action === 'getData') {
     const files = fs.readdirSync(COLLECTED_DIR);
     const data = [];
-    
     for (const file of files) {
-      const content = fs.readFileSync(path.join(COLLECTED_DIR, file));
-      data.push(JSON.parse(content));
+      try {
+        const content = fs.readFileSync(path.join(COLLECTED_DIR, file));
+        data.push(JSON.parse(content));
+      } catch(e) {}
     }
-    
     return res.status(200).json({ data: data.reverse() });
   }
   
