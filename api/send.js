@@ -1,15 +1,17 @@
 const nodemailer = require('nodemailer');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
+  // Handle preflight request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   
+  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -17,18 +19,48 @@ module.exports = async (req, res) => {
   try {
     const { name, from_email, to_email, subject, message } = req.body;
     
-    // Validate
+    // Validate required fields
     if (!name || !from_email || !to_email || !subject || !message) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
     
-    // Email validation
+    // Validate email format
     const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
-    if (!emailRegex.test(from_email) || !emailRegex.test(to_email)) {
-      return res.status(400).json({ error: 'Invalid email address' });
+    if (!emailRegex.test(from_email)) {
+      return res.status(400).json({ error: 'Invalid sender email' });
+    }
+    if (!emailRegex.test(to_email)) {
+      return res.status(400).json({ error: 'Invalid receiver email' });
     }
     
-    // SMTP Configuration - Your Gmail
+    // Email content
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 10px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #006a4e, #f42a41); color: white; padding: 20px; text-align: center;">
+            <h2>QuickMail</h2>
+            <p>Made by Hossain | Made in Bangladesh 🇧🇩</p>
+          </div>
+          <div style="padding: 20px;">
+            <h3>Message from: ${escapeHtml(name)}</h3>
+            <p><strong>Email:</strong> ${escapeHtml(from_email)}</p>
+            <hr>
+            <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
+          </div>
+          <div style="background: #f0f0f0; padding: 10px; text-align: center; font-size: 12px;">
+            Sent via QuickMail
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Create SMTP transporter
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
@@ -39,42 +71,15 @@ module.exports = async (req, res) => {
       }
     });
     
-    // Email content
-    const emailBody = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-      </head>
-      <body>
-        <div style="font-family: Arial; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 10px; overflow: hidden;">
-          <div style="background: linear-gradient(135deg, #006a4e, #f42a41); color: white; padding: 20px; text-align: center;">
-            <h2>QuickMail</h2>
-            <p>Made by Hossain | Made in Bangladesh 🇧🇩</p>
-          </div>
-          <div style="padding: 20px;">
-            <h3>Message from: ${name}</h3>
-            <p><strong>Email:</strong> ${from_email}</p>
-            <hr>
-            <p>${message.replace(/\n/g, '<br>')}</p>
-          </div>
-          <div style="background: #f0f0f0; padding: 10px; text-align: center; font-size: 12px;">
-            Sent via QuickMail
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-    
-    // Send email - Sender will show as the user's email
-    const mailOptions = {
+    // Send email
+    const info = await transporter.sendMail({
       from: `"${name}" <${from_email}>`,
       to: to_email,
       subject: subject,
-      html: emailBody
-    };
+      html: emailHtml
+    });
     
-    await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.messageId);
     
     return res.status(200).json({ 
       success: true, 
@@ -87,4 +92,14 @@ module.exports = async (req, res) => {
       error: error.message || 'Failed to send email' 
     });
   }
-};
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
