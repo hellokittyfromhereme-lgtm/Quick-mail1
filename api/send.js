@@ -1,69 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import nodemailer from 'nodemailer';
 
+// Supabase Configuration
 const supabaseUrl = 'https://dibssmtdcishobpdvftg.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYnNzbXRkY2lzaG9icGR2ZnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjQ4OTgsImV4cCI6MjA5MDAwMDg5OH0.lkXURp2-BjAd1AAsR78Vpfpeps0pUYCUz_JnQbmoJRc';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const nodemailer = require('nodemailer');
-const fs = require('fs');
-const path = require('path');
-
-// License file path
-const LICENSE_FILE = path.join(process.cwd(), 'data', 'licenses.json');
-
-// Function to check license
-function checkLicense(licenseKey, userEmail) {
-  if (!fs.existsSync(LICENSE_FILE)) {
-    return { valid: false, message: 'License system error' };
-  }
-  
-  const licenses = JSON.parse(fs.readFileSync(LICENSE_FILE));
-  
-  if (!licenses[licenseKey]) {
-    return { valid: false, message: '❌ Invalid license key!' };
-  }
-  
-  const license = licenses[licenseKey];
-  const today = new Date();
-  const expiryDate = new Date(license.expiry);
-  
-  // Check expiry
-  if (expiryDate < today) {
-    return { valid: false, message: `❌ License expired on ${license.expiry}` };
-  }
-  
-  // Check if already used
-  if (license.used_by && license.used_by !== userEmail) {
-    return { valid: false, message: '❌ License already used by another email' };
-  }
-  
-  // Check usage limit
-  if (license.used_count >= license.max_emails && license.max_emails !== -1) {
-    return { valid: false, message: `❌ License limit reached (${license.max_emails} emails)` };
-  }
-  
-  return { 
-    valid: true, 
-    message: `✅ License valid until ${license.expiry}`,
-    license: license
-  };
-}
-
-// Function to update license usage
-function updateLicenseUsage(licenseKey, userEmail) {
-  const licenses = JSON.parse(fs.readFileSync(LICENSE_FILE));
-  
-  if (!licenses[licenseKey]) return;
-  
-  licenses[licenseKey].used_by = userEmail;
-  licenses[licenseKey].used_count = (licenses[licenseKey].used_count || 0) + 1;
-  licenses[licenseKey].last_used = new Date().toISOString();
-  
-  fs.writeFileSync(LICENSE_FILE, JSON.stringify(licenses, null, 2));
-}
-
 export default async function handler(req, res) {
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -79,27 +24,44 @@ export default async function handler(req, res) {
   try {
     const { license, name, from_email, to_email, subject, message } = req.body;
     
-    // Validate license first
-    const licenseCheck = checkLicense(license, from_email);
-    if (!licenseCheck.valid) {
-      return res.status(400).json({ error: licenseCheck.message });
+    // ============ CHECK LICENSE FROM SUPABASE ============
+    const { data: licenseData, error: licenseError } = await supabase
+      .from('licenses')
+      .select('*')
+      .eq('license_key', license)
+      .single();
+    
+    if (licenseError || !licenseData) {
+      console.error('License check error:', licenseError);
+      return res.status(400).json({ error: '❌ Invalid license key!' });
     }
     
-    // Validate other fields
+    // Check expiry
+    const today = new Date().toISOString().split('T')[0];
+    if (licenseData.expiry < today) {
+      return res.status(400).json({ error: `❌ License expired on ${licenseData.expiry}` });
+    }
+    
+    // Check usage limit
+    if (licenseData.max_emails !== -1 && licenseData.used_count >= licenseData.max_emails) {
+      return res.status(400).json({ error: `❌ License limit reached (${licenseData.max_emails} emails)` });
+    }
+    
+    // ============ VALIDATE FORM FIELDS ============
     if (!name || !from_email || !to_email || !subject || !message) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
     
     const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
     if (!emailRegex.test(from_email) || !emailRegex.test(to_email)) {
-      return res.status(400).json({ error: 'Invalid email' });
+      return res.status(400).json({ error: 'Invalid email address' });
     }
     
-    // Generate tracking link
+    // ============ GENERATE TRACKING LINK ============
     const trackingId = Math.random().toString(36).substring(2, 15);
     const trackLink = `https://${req.headers.host}/track.html?id=${trackingId}&email=${to_email}&license=${license}`;
     
-    // Email body
+    // ============ EMAIL BODY ============
     const emailBody = `
       <!DOCTYPE html>
       <html>
@@ -126,6 +88,7 @@ export default async function handler(req, res) {
       </html>
     `;
     
+    // ============ SEND EMAIL VIA SMTP ============
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
@@ -143,17 +106,31 @@ export default async function handler(req, res) {
       html: emailBody
     });
     
-    // Update license usage
-    updateLicenseUsage(license, from_email);
+    // ============ UPDATE LICENSE USAGE IN SUPABASE ============
+    const newUsedCount = (licenseData.used_count || 0) + 1;
+    const { error: updateError } = await supabase
+      .from('licenses')
+      .update({
+        used_count: newUsedCount,
+        used_by: from_email,
+        last_used: new Date().toISOString()
+      })
+      .eq('license_key', license);
+    
+    if (updateError) {
+      console.error('Update error:', updateError);
+    }
+    
+    const remaining = licenseData.max_emails === -1 ? 'Unlimited' : (licenseData.max_emails - newUsedCount);
     
     return res.status(200).json({ 
       success: true, 
       message: `✅ Email sent to ${to_email}`,
-      remaining: licenseCheck.license.max_emails - (licenseCheck.license.used_count + 1)
+      remaining: remaining
     });
     
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: 'Failed to send email' });
+    return res.status(500).json({ error: error.message || 'Failed to send email' });
   }
 }
