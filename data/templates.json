@@ -1,0 +1,83 @@
+{
+  "business": [
+    {
+      "id": "business_1",
+      "name": "Corporate Newsletter",
+      "category": "Business",
+      "image": "https://via.placeholder.com/600x300/006a4e/white?text=Corporate+Newsletter",
+      "title": "Professional corporate newsletter template",
+      "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#006a4e,#f42a41);padding:30px;text-align:center;'><h1 style='color:white;'>{{COMPANY_NAME}}</h1></div><div style='padding:20px;'><h2>Hello {{NAME}},</h2><p>{{MESSAGE}}</p><a href='{{LINK}}' style='background:#006a4e;color:white;padding:10px 20px;text-decoration:none;border-radius:30px;'>Learn More</a></div></div>",
+      "variables": ["COMPANY_NAME", "NAME", "MESSAGE", "LINK"]
+    },
+    {
+      "id": "business_2",
+      "name": "Product Launch",
+      "category": "Business",
+      "image": "https://via.placeholder.com/600x300/f42a41/white?text=Product+Launch",
+      "title": "Exciting product launch announcement",
+      "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><div style='background:#f42a41;padding:50px;text-align:center;'><h1 style='color:white;'>🚀 {{PRODUCT_NAME}}</h1><p style='color:white;'>Launching Soon!</p></div><div style='padding:20px;'><p>Hi {{NAME}},</p><p>{{DESCRIPTION}}</p><a href='{{LAUNCH_LINK}}' style='background:#f42a41;color:white;padding:12px 30px;text-decoration:none;border-radius:50px;'>Pre-Order Now</a></div></div>",
+      "variables": ["PRODUCT_NAME", "NAME", "DESCRIPTION", "LAUNCH_LINK"]
+    },
+    {
+      "id": "business_3",
+      "name": "Event Invitation",
+      "category": "Business",
+      "image": "https://via.placeholder.com/600x300/ffd700/black?text=Event+Invitation",
+      "title": "Elegant event invitation design",
+      "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;background:#fff;'><div style='background:#ffd700;padding:30px;text-align:center;'><h1>🎉 {{EVENT_NAME}}</h1><p>You're Invited!</p></div><div style='padding:20px;'><p>Dear {{NAME}},</p><p>Join us on {{DATE}} at {{VENUE}}.</p><a href='{{RSVP_LINK}}' style='background:#ffd700;color:#333;padding:10px 20px;text-decoration:none;border-radius:30px;'>RSVP Now</a></div></div>",
+      "variables": ["EVENT_NAME", "NAME", "DATE", "VENUE", "RSVP_LINK"]
+    }
+  ],
+  "marketing": [
+    {
+      "id": "marketing_1",
+      "name": "Sale Alert",
+      "category": "Marketing",
+      "image": "https://via.placeholder.com/600x300/f42a41/white?text=SALE+ALERT",
+      "title": "Flash sale announcement template",
+      "html": "<div style='background:linear-gradient(135deg,#f42a41,#ff6b6b);padding:60px;text-align:center;'><h1 style='color:white;font-size:48px;'>🔥 {{SALE_PERCENT}}% OFF</h1><p style='color:white;'>Limited Time Offer</p><a href='{{SHOP_LINK}}' style='background:white;color:#f42a41;padding:15px 40px;text-decoration:none;border-radius:50px;'>Shop Now</a><p style='color:white;margin-top:20px;'>Use Code: {{COUPON_CODE}}</p></div>",
+      "variables": ["SALE_PERCENT", "SHOP_LINK", "COUPON_CODE"]
+    },
+    {
+      "id": "marketing_2",
+      "name": "Welcome Email",
+      "category": "Marketing",
+      "image": "https://via.placeholder.com/600x300/006a4e/white?text=Welcome",
+      "title": "Warm welcome email for new users",
+      "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;background:#fff;'><div style='background:#006a4e;padding:40px;text-align:center;'><h1 style='color:white;'>Welcome to {{COMPANY_NAME}}!</h1></div><div style='padding:20px;'><h2>Hello {{NAME}},</h2><p>Thank you for joining us!</p><div style='background:#f5f5f5;padding:15px;'><p>Your gift: <strong>{{WELCOME_GIFT}}</strong></p></div><a href='{{GET_STARTED}}' style='background:#006a4e;color:white;padding:10px 20px;text-decoration:none;border-radius:30px;'>Get Started</a></div></div>",
+      "variables": ["COMPANY_NAME", "NAME", "WELCOME_GIFT", "GET_STARTED"]
+    }
+  ],
+  "personal": [
+    {
+      "id": "personal_1",
+      "name": "Birthday Wish",
+      "category": "Personal",
+      "image": "https://via.placeholder.com/600x300/ff69b4/white?text=Happy+Birthday",
+      "title": "Colorful birthday celebration email",
+      "html": "<div style='font-family:Georgia;max-width:500px;margin:0 auto;padding:20px;text-align:center;'><h1>🎂 Happy Birthday {{NAME}}!</h1><img src='{{IMAGE_URL}}' style='width:100%;border-radius:20px;margin:20px 0;'><p>{{MESSAGE}}</p><p>With love,<br>{{FROM_NAME}}</p></div>",
+      "variables": ["NAME", "IMAGE_URL", "MESSAGE", "FROM_NAME"]
+    },
+    {
+      "id": "personal_2",
+      "name": "Thank You Note",
+      "category": "Personal",
+      "image": "https://via.placeholder.com/600x300/4caf50/white?text=Thank+You",
+      "title": "Simple thank you note template",
+      "html": "<div style='max-width:500px;margin:0 auto;background:#f9f9f9;border-radius:20px;padding:30px;'><h2 style='color:#4caf50;'>Thank You!</h2><p>Dear {{NAME}},</p><p>{{MESSAGE}}</p><p>Best regards,<br>{{FROM_NAME}}</p></div>",
+      "variables": ["NAME", "MESSAGE", "FROM_NAME"]
+    }
+  ],
+  "ecommerce": [
+    {
+      "id": "ecommerce_1",
+      "name": "Order Confirmation",
+      "category": "E-Commerce",
+      "image": "https://via.placeholder.com/600x300/2196f3/white?text=Order+Confirmed",
+      "title": "Professional order confirmation email",
+      "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><div style='background:#2196f3;padding:20px;text-align:center;'><h1 style='color:white;'>Order Confirmed! ✅</h1></div><div style='padding:20px;'><p>Hello {{NAME}},</p><p>Your order #{{ORDER_ID}} has been confirmed.</p><div style='background:#f5f5f5;padding:15px;'><p><strong>Items:</strong> {{ITEMS}}</p><p><strong>Total:</strong> {{TOTAL}}</p></div><a href='{{TRACK_LINK}}' style='background:#2196f3;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;'>Track Order</a></div></div>",
+      "variables": ["NAME", "ORDER_ID", "ITEMS", "TOTAL", "TRACK_LINK"]
+    }
+  ],
+  "custom": []
+}
