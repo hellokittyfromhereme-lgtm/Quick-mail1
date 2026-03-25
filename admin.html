@@ -3,62 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickMail Admin Panel</title>
+    <title>QuickMail Pro - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
             min-height: 100vh;
+            position: relative;
+        }
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            opacity: 0.3;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,106,78,0.9), rgba(244,42,65,0.9));
+            z-index: -1;
+        }
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-50px); }
         }
         .login-screen {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #006a4e, #f42a41);
         }
         .login-box {
-            background: white;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
             padding: 40px;
-            border-radius: 28px;
-            width: 350px;
+            width: 380px;
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.6s ease;
+        }
+        .login-box h2 {
+            color: white;
+            margin-bottom: 20px;
         }
         .login-box input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 15px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            color: white;
         }
         .login-box button {
-            background: linear-gradient(135deg, #006a4e, #f42a41);
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
             width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
         }
         .dashboard { display: none; padding: 20px; }
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
+        .glass-header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 20px 30px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .live-stats {
             background: linear-gradient(135deg, #006a4e, #f42a41);
-            color: white;
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 40px;
-            font-size: 14px;
+            color: white;
         }
         .nav-tabs {
             display: flex;
@@ -67,21 +117,25 @@
             flex-wrap: wrap;
         }
         .tab {
-            padding: 10px 20px;
-            background: white;
-            border-radius: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px 24px;
+            border-radius: 40px;
             cursor: pointer;
-            transition: 0.3s;
-        }
-        .tab.active {
-            background: linear-gradient(135deg, #006a4e, #f42a41);
             color: white;
+            transition: all 0.3s;
+        }
+        .tab.active, .tab:hover {
+            background: linear-gradient(135deg, #006a4e, #f42a41);
         }
         .tab-content {
             display: none;
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeIn 0.3s ease;
         }
         .tab-content.active { display: block; }
         .stats-grid {
@@ -92,31 +146,30 @@
         }
         .stat-card {
             background: linear-gradient(135deg, #006a4e, #f42a41);
-            color: white;
-            padding: 20px;
-            border-radius: 16px;
+            padding: 25px;
+            border-radius: 20px;
             text-align: center;
+            color: white;
         }
-        .stat-number { font-size: 32px; font-weight: bold; }
+        .stat-number { font-size: 36px; font-weight: 800; }
         input, select, textarea {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            border: 2px solid #e0e0e0;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 12px;
-            font-family: inherit;
+            color: white;
         }
         button {
-            background: #006a4e;
+            background: linear-gradient(135deg, #006a4e, #f42a41);
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 12px;
+            border-radius: 40px;
             cursor: pointer;
-            font-size: 16px;
             font-weight: 600;
         }
-        button:hover { opacity: 0.9; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -124,13 +177,13 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: white;
         }
-        th { background: #f8fafc; }
         .delete-btn { background: #f42a41; padding: 5px 12px; font-size: 12px; }
         .license-code {
             font-family: monospace;
-            background: #f1f5f9;
+            background: rgba(0,0,0,0.3);
             padding: 4px 8px;
             border-radius: 6px;
             font-size: 12px;
@@ -141,16 +194,17 @@
             gap: 20px;
         }
         .template-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .template-card img {
             width: 100%;
             height: 150px;
             object-fit: cover;
         }
-        .template-card .info { padding: 12px; }
+        .template-card .info { padding: 15px; color: white; }
         .visitor-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -158,170 +212,151 @@
             margin-bottom: 20px;
         }
         .visitor-card {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 16px;
             text-align: center;
+            color: white;
         }
-        .visitor-card .number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #006a4e;
+        .visitor-card .number { font-size: 28px; font-weight: bold; color: #ffd700; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         @media (max-width: 768px) {
-            .header { flex-direction: column; text-align: center; }
+            .glass-header { flex-direction: column; text-align: center; }
             .tab { font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
 <body>
+    <video class="video-bg" autoplay loop muted playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-particles-wave-32195-large.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    <div class="particles" id="particles"></div>
+
     <div id="loginScreen" class="login-screen">
         <div class="login-box">
-            <h2>🔐 Admin Access</h2>
-            <input type="password" id="adminPass" placeholder="Enter password">
-            <button onclick="login()">Login</button>
-            <p style="margin-top: 15px; font-size: 12px; color: #666;">Contact admin for password</p>
+            <h2><i class="fas fa-crown"></i> Admin Portal</h2>
+            <input type="password" id="adminPass" placeholder="Enter master password">
+            <button onclick="login()"><i class="fas fa-unlock-alt"></i> Access Dashboard</button>
         </div>
     </div>
 
     <div id="dashboard" class="dashboard">
-        <div class="header">
-            <h1>📊 QuickMail Admin Panel</h1>
-            <div class="live-stats" id="liveVisitorStats">👥 Loading...</div>
-            <button onclick="logout()" style="background:#f42a41;">🚪 Logout</button>
+        <div class="glass-header">
+            <h1 style="color: white;"><i class="fas fa-crown"></i> QuickMail Pro Admin</h1>
+            <div class="live-stats" id="liveVisitorStats"><i class="fas fa-users"></i> Loading...</div>
+            <button onclick="logout()" style="background: #f42a41;"><i class="fas fa-sign-out-alt"></i> Exit</button>
         </div>
 
         <div class="nav-tabs">
-            <div class="tab active" onclick="showTab('licenses')">🔑 Licenses</div>
-            <div class="tab" onclick="showTab('generate')">✨ Generate License</div>
-            <div class="tab" onclick="showTab('templates')">🎨 Templates</div>
-            <div class="tab" onclick="showTab('upload')">📤 Upload Template</div>
-            <div class="tab" onclick="showTab('data')">📁 Collected Data</div>
-            <div class="tab" onclick="showTab('stats')">📈 Statistics</div>
-            <div class="tab" onclick="showTab('visitors')">👥 Visitors</div>
+            <div class="tab active" onclick="showTab('licenses')"><i class="fas fa-key"></i> Licenses</div>
+            <div class="tab" onclick="showTab('generate')"><i class="fas fa-magic"></i> Generate</div>
+            <div class="tab" onclick="showTab('templates')"><i class="fas fa-palette"></i> Templates</div>
+            <div class="tab" onclick="showTab('upload')"><i class="fas fa-upload"></i> Upload</div>
+            <div class="tab" onclick="showTab('data')"><i class="fas fa-database"></i> Data</div>
+            <div class="tab" onclick="showTab('stats')"><i class="fas fa-chart-line"></i> Stats</div>
+            <div class="tab" onclick="showTab('visitors')"><i class="fas fa-chart-bar"></i> Visitors</div>
         </div>
 
-        <!-- Licenses Tab -->
         <div id="licensesTab" class="tab-content active">
-            <h3>📋 All Licenses</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-list"></i> All Licenses</h3>
             <div style="overflow-x: auto;">
-                <table id="licensesTable">
-                    <thead>
-                        <tr><th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th> </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <table id="licensesTable"><thead><tr><th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max</th><th>Used</th><th>Used By</th><th>Action</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
 
-        <!-- Generate License Tab -->
         <div id="generateTab" class="tab-content">
-            <h3>✨ Generate New License</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-magic"></i> Generate License</h3>
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-number">7-365</div><div>Days</div></div>
+                <div class="stat-card"><div class="stat-number">7-365</div><div>Days Range</div></div>
                 <div class="stat-card"><div class="stat-number">10-∞</div><div>Email Limit</div></div>
             </div>
-            
-            <div style="margin: 20px 0;">
-                <label>License Type:</label>
-                <select id="licenseType" onchange="toggleCustomFields()">
-                    <option value="Trial">📀 Trial (7 days, 10 emails)</option>
-                    <option value="Monthly">📅 Monthly (30 days, 100 emails)</option>
-                    <option value="Premium">⭐ Premium (90 days, 500 emails)</option>
-                    <option value="Pro">💎 Pro (180 days, 2000 emails)</option>
-                    <option value="Lifetime">👑 Lifetime (365 days, Unlimited)</option>
-                    <option value="Custom">🎨 Custom</option>
-                </select>
-            </div>
-            
+            <select id="licenseType" onchange="toggleCustomFields()">
+                <option value="Trial">📀 Trial (7 days, 10 emails)</option>
+                <option value="Monthly">📅 Monthly (30 days, 100 emails)</option>
+                <option value="Premium">⭐ Premium (90 days, 500 emails)</option>
+                <option value="Pro">💎 Pro (180 days, 2000 emails)</option>
+                <option value="Lifetime">👑 Lifetime (365 days, Unlimited)</option>
+                <option value="Custom">🎨 Custom</option>
+            </select>
             <div id="customFields" style="display: none;">
-                <label>Days:</label>
-                <input type="number" id="customDays" value="30" placeholder="Number of days">
-                <label>Max Emails:</label>
+                <input type="number" id="customDays" placeholder="Days" value="30">
                 <select id="customMaxEmails">
-                    <option value="10">10 emails/day</option>
-                    <option value="50">50 emails/day</option>
-                    <option value="100">100 emails/day</option>
-                    <option value="500">500 emails/day</option>
-                    <option value="1000">1000 emails/day</option>
-                    <option value="5000">5000 emails/day</option>
-                    <option value="unlimited">Unlimited</option>
+                    <option value="10">10 emails/day</option><option value="50">50</option><option value="100">100</option>
+                    <option value="500">500</option><option value="1000">1000</option><option value="unlimited">Unlimited</option>
                 </select>
             </div>
-            
-            <button onclick="generateLicense()" style="width: 100%; margin-top: 20px;">🔑 Generate License</button>
-            
-            <div id="newLicense" style="margin-top: 20px; padding: 20px; background: #e8f5e9; border-radius: 12px; display: none;">
-                <strong>✅ License Created Successfully!</strong><br><br>
-                <code id="licenseKeyDisplay" style="font-size: 18px; background: white; padding: 8px; display: inline-block; border-radius: 8px;"></code>
-                <br><br>
-                <button onclick="copyLicense()">📋 Copy License Key</button>
-                <button onclick="closeLicenseDisplay()" style="background: #666;">Close</button>
-            </div>
+            <button onclick="generateLicense()" style="margin-top: 20px; width: 100%;"><i class="fas fa-key"></i> Generate License</button>
+            <div id="newLicense" style="margin-top: 20px; background: rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; display: none;"></div>
         </div>
 
-        <!-- Templates Tab -->
         <div id="templatesTab" class="tab-content">
-            <h3>🎨 All Templates</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-palette"></i> Template Library</h3>
             <div id="templatesGrid" class="template-grid"></div>
         </div>
 
-        <!-- Upload Template Tab -->
         <div id="uploadTab" class="tab-content">
-            <h3>📤 Upload Custom Template</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-upload"></i> Upload Template</h3>
             <input type="text" id="templateName" placeholder="Template Name">
             <select id="templateCategory">
-                <option value="business">Business</option>
-                <option value="marketing">Marketing</option>
-                <option value="personal">Personal</option>
-                <option value="ecommerce">E-Commerce</option>
-                <option value="custom">Custom</option>
+                <option value="business">Business</option><option value="marketing">Marketing</option>
+                <option value="personal">Personal</option><option value="ecommerce">E-Commerce</option><option value="custom">Custom</option>
             </select>
             <input type="text" id="templateTitle" placeholder="Title/Description">
             <input type="file" id="templateImage" accept="image/*">
             <textarea id="templateHtml" rows="8" placeholder="HTML template code..."></textarea>
-            <input type="text" id="templateVariables" placeholder="Variables (comma separated): NAME, EMAIL, LINK">
-            <button onclick="uploadTemplate()">📤 Upload Template</button>
+            <input type="text" id="templateVariables" placeholder="Variables (comma): NAME, EMAIL, LINK">
+            <button onclick="uploadTemplate()"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
         </div>
 
-        <!-- Collected Data Tab -->
         <div id="dataTab" class="tab-content">
-            <h3>📁 Collected User Data</h3>
-            <div style="overflow-x: auto;">
-                <table id="dataTable">
-                    <thead><tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>License</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-database"></i> Collected Data</h3>
+            <div style="overflow-x: auto;"><table id="dataTable"><thead><tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>License</th></tr></thead><tbody></tbody></table></div>
         </div>
 
-        <!-- Statistics Tab -->
         <div id="statsTab" class="tab-content">
-            <h3>📈 Statistics</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Statistics</h3>
             <div id="statsCards" class="stats-grid"></div>
         </div>
 
-        <!-- Visitors Tab -->
         <div id="visitorsTab" class="tab-content">
-            <h3>👥 Visitor Statistics</h3>
+            <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-chart-bar"></i> Visitor Analytics</h3>
             <div class="visitor-stats" id="visitorStats">
                 <div class="visitor-card"><div class="number" id="todayVisitors">0</div><div>Today</div></div>
                 <div class="visitor-card"><div class="number" id="weekVisitors">0</div><div>This Week</div></div>
                 <div class="visitor-card"><div class="number" id="monthVisitors">0</div><div>This Month</div></div>
-                <div class="visitor-card"><div class="number" id="totalVisitors">0</div><div>Total All Time</div></div>
-                <div class="visitor-card"><div class="number" id="onlineVisitors">0</div><div>Online Now</div></div>
+                <div class="visitor-card"><div class="number" id="totalVisitors">0</div><div>Total</div></div>
+                <div class="visitor-card"><div class="number" id="onlineVisitors">0</div><div>Online</div></div>
             </div>
-            <h4>Recent Visitors</h4>
-            <div style="overflow-x: auto;">
-                <table id="visitorTable">
-                    <thead><tr><th>Time</th><th>IP</th><th>Location</th><th>Page</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <h4 style="color: white;">Recent Visitors</h4>
+            <div style="overflow-x: auto;"><table id="visitorTable"><thead><tr><th>Time</th><th>IP</th><th>Location</th><th>Page</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
     <script>
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = Math.random() * 4 + 2 + 'px';
+                p.style.height = p.style.width;
+                p.style.left = Math.random() * 100 + '%';
+                p.style.top = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 20 + 's';
+                p.style.animationDuration = Math.random() * 15 + 10 + 's';
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
         let adminPassword = '';
         
         function login() {
@@ -354,167 +389,70 @@
         }
         
         function toggleCustomFields() {
-            const type = document.getElementById('licenseType').value;
-            document.getElementById('customFields').style.display = type === 'Custom' ? 'block' : 'none';
+            document.getElementById('customFields').style.display = document.getElementById('licenseType').value === 'Custom' ? 'block' : 'none';
         }
         
         async function generateLicense() {
             const type = document.getElementById('licenseType').value;
             let days, max_emails;
-            
             if (type === 'Custom') {
                 days = document.getElementById('customDays').value;
                 max_emails = document.getElementById('customMaxEmails').value;
             } else {
-                const presets = {
-                    'Trial': [7, 10],
-                    'Monthly': [30, 100],
-                    'Premium': [90, 500],
-                    'Pro': [180, 2000],
-                    'Lifetime': [365, 'unlimited']
-                };
-                [days, max_emails] = presets[type];
+                const p = { 'Trial':[7,10], 'Monthly':[30,100], 'Premium':[90,500], 'Pro':[180,2000], 'Lifetime':[365,'unlimited'] };
+                [days, max_emails] = p[type];
             }
-            
-            if (!days || days < 1) {
-                alert('Please enter valid days');
-                return;
-            }
-            
-            const loading = document.getElementById('newLicense');
-            loading.style.display = 'block';
-            loading.innerHTML = '<strong>⏳ Generating license...</strong>';
-            
-            try {
-                const response = await fetch('/api/admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'generate',
-                        password: adminPassword,
-                        licenseData: { days, max_emails, type }
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    document.getElementById('licenseKeyDisplay').innerText = result.licenseKey;
-                    document.getElementById('newLicense').innerHTML = `
-                        <strong>✅ License Created Successfully!</strong><br><br>
-                        <code id="licenseKeyDisplay" style="font-size: 18px; background: white; padding: 8px; display: inline-block; border-radius: 8px;">${result.licenseKey}</code>
-                        <br><br>
-                        <p><strong>Expires:</strong> ${result.expiry}</p>
-                        <p><strong>Max Emails:</strong> ${result.max_emails === 'unlimited' ? 'Unlimited' : result.max_emails + ' emails'}</p>
-                        <br>
-                        <button onclick="copyLicense()">📋 Copy License Key</button>
-                        <button onclick="closeLicenseDisplay()" style="background: #666;">Close</button>
-                    `;
-                    await loadLicenses();
-                    await loadStats();
-                } else {
-                    document.getElementById('newLicense').innerHTML = `
-                        <strong style="color: red;">❌ Failed to generate license</strong><br>
-                        <p>${result.error || 'Unknown error'}</p>
-                        <br>
-                        <button onclick="closeLicenseDisplay()">Close</button>
-                    `;
-                }
-            } catch (error) {
+            const res = await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'generate', password: adminPassword, licenseData: { days, max_emails, type } })
+            });
+            const result = await res.json();
+            if (result.success) {
                 document.getElementById('newLicense').innerHTML = `
-                    <strong style="color: red;">❌ Error: ${error.message}</strong><br>
-                    <button onclick="closeLicenseDisplay()">Close</button>
+                    <strong style="color:#ffd700;">✅ License Created!</strong><br>
+                    <code style="font-size:18px; display:block; margin:15px 0;">${result.licenseKey}</code>
+                    <p>Expires: ${result.expiry}</p>
+                    <p>Max: ${result.max_emails === 'unlimited' ? 'Unlimited' : result.max_emails + ' emails'}</p>
+                    <button onclick="copyLicense('${result.licenseKey}')">Copy</button>
+                    <button onclick="document.getElementById('newLicense').style.display='none'">Close</button>
                 `;
+                document.getElementById('newLicense').style.display = 'block';
+                loadLicenses();
+                loadStats();
+            } else {
+                document.getElementById('newLicense').innerHTML = `<p style="color:#f42a41;">❌ Failed: ${result.error}</p>`;
+                document.getElementById('newLicense').style.display = 'block';
             }
         }
         
-        function closeLicenseDisplay() {
-            document.getElementById('newLicense').style.display = 'none';
-        }
-        
-        function copyLicense() {
-            const text = document.getElementById('licenseKeyDisplay').innerText;
-            navigator.clipboard.writeText(text);
-            alert('License copied to clipboard!');
-        }
+        function copyLicense(key) { navigator.clipboard.writeText(key); alert('Copied!'); }
         
         async function loadLicenses() {
-            try {
-                const res = await fetch('/api/admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'list', password: adminPassword })
-                });
-                const data = await res.json();
-                const tbody = document.querySelector('#licensesTable tbody');
-                tbody.innerHTML = '';
-                for (const [key, lic] of Object.entries(data.licenses || {})) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><code class="license-code">${key}</code></td>
-                            <td>${lic.type}</td>
-                            <td>${lic.created?.split('T')[0] || '-'}</td>
-                            <td>${lic.expiry}</td>
-                            <td>${lic.max_emails === -1 ? '∞' : lic.max_emails}</td>
-                            <td>${lic.used_count || 0}</td>
-                            <td>${lic.used_by || '-'}</td>
-                            <td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td>
-                        </tr>
-                    `;
-                }
-            } catch (e) {
-                console.error('Load licenses error:', e);
+            const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) });
+            const data = await res.json();
+            const tbody = document.querySelector('#licensesTable tbody');
+            tbody.innerHTML = '';
+            for (const [key, lic] of Object.entries(data.licenses || {})) {
+                tbody.innerHTML += `<tr><td><code class="license-code">${key}</code></td><td>${lic.type}</td><td>${lic.created?.split('T')[0]||'-'}</td><td>${lic.expiry}</td><td>${lic.max_emails===-1?'∞':lic.max_emails}</td><td>${lic.used_count||0}</td><td>${lic.used_by||'-'}</td><td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td></tr>`;
             }
         }
         
-        async function deleteLicense(key) {
-            if (confirm('Delete this license? This action cannot be undone.')) {
-                await fetch('/api/admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', password: adminPassword, licenseData: { licenseKey: key } })
-                });
-                await loadLicenses();
-                await loadStats();
-            }
-        }
+        async function deleteLicense(key) { if(confirm('Delete?')) { await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'delete', password:adminPassword, licenseData:{ licenseKey:key } }) }); loadLicenses(); loadStats(); } }
         
         async function loadTemplates() {
-            try {
-                const res = await fetch('/api/templates');
-                const templates = await res.json();
-                const grid = document.getElementById('templatesGrid');
-                grid.innerHTML = '';
-                for (const [cat, items] of Object.entries(templates)) {
-                    for (const t of items) {
-                        grid.innerHTML += `
-                            <div class="template-card">
-                                <img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'">
-                                <div class="info">
-                                    <h4>${t.name}</h4>
-                                    <p>${t.title}</p>
-                                    <small style="color:#666;">${cat}</small>
-                                    ${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${cat}','${t.id}')" style="margin-top:8px;">Delete</button>` : ''}
-                                </div>
-                            </div>
-                        `;
-                    }
+            const res = await fetch('/api/templates');
+            const templates = await res.json();
+            const grid = document.getElementById('templatesGrid');
+            grid.innerHTML = '';
+            for (const [cat, items] of Object.entries(templates)) {
+                for (const t of items) {
+                    grid.innerHTML += `<div class="template-card"><img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'"><div class="info"><h4>${t.name}</h4><p>${t.title}</p><small>${cat}</small>${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${cat}','${t.id}')">Delete</button>` : ''}</div></div>`;
                 }
-            } catch (e) {
-                console.error('Load templates error:', e);
             }
         }
         
-        async function deleteTemplate(cat, id) {
-            if (confirm('Delete this template?')) {
-                await fetch('/api/templates', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ category: cat, id, password: adminPassword })
-                });
-                await loadTemplates();
-            }
-        }
+        async function deleteTemplate(cat,id) { if(confirm('Delete template?')) { await fetch('/api/templates', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ category:cat, id, password:adminPassword }) }); loadTemplates(); } }
         
         async function uploadTemplate() {
             const fd = new FormData();
@@ -522,114 +460,57 @@
             fd.append('category', document.getElementById('templateCategory').value);
             fd.append('title', document.getElementById('templateTitle').value);
             fd.append('html', document.getElementById('templateHtml').value);
-            fd.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v => v.trim())));
+            fd.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v=>v.trim())));
             fd.append('password', adminPassword);
             const img = document.getElementById('templateImage').files[0];
-            if (img) fd.append('image', img);
-            
-            const res = await fetch('/api/templates', { method: 'POST', body: fd });
+            if(img) fd.append('image', img);
+            const res = await fetch('/api/templates', { method:'POST', body:fd });
             const result = await res.json();
-            if (result.success) {
-                alert('Template uploaded successfully!');
-                document.getElementById('templateName').value = '';
-                document.getElementById('templateTitle').value = '';
-                document.getElementById('templateHtml').value = '';
-                document.getElementById('templateVariables').value = '';
-                document.getElementById('templateImage').value = '';
-                await loadTemplates();
-            } else {
-                alert('Upload failed: ' + (result.error || 'Unknown error'));
-            }
+            alert(result.success ? 'Template uploaded!' : 'Upload failed');
+            if(result.success) loadTemplates();
         }
         
         async function loadCollectedData() {
-            try {
-                const res = await fetch('/api/admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getData', password: adminPassword })
-                });
-                const result = await res.json();
-                const tbody = document.querySelector('#dataTable tbody');
-                tbody.innerHTML = '';
-                if (result.data) {
-                    for (const item of result.data.slice(0, 50)) {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${new Date(item.timestamp).toLocaleString()}</td>
-                                <td>${item.userEmail || '-'}</td>
-                                <td>${item.ip || '-'}</td>
-                                <td>${item.location?.city || '-'}, ${item.location?.country || '-'}</td>
-                                <td>${item.browser?.substring(0, 40) || '-'}</td>
-                                <td>${item.license || '-'}</td>
-                            </tr>
-                        `;
-                    }
+            const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'getData', password:adminPassword }) });
+            const result = await res.json();
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            if(result.data) {
+                for(const item of result.data.slice(0,50)) {
+                    tbody.innerHTML += `<tr><td>${new Date(item.timestamp).toLocaleString()}</td><td>${item.userEmail||'-'}</td><td>${item.ip||'-'}</td><td>${item.location?.city||'-'}, ${item.location?.country||'-'}</td><td>${item.browser?.substring(0,40)||'-'}</td><td>${item.license||'-'}</td></tr>`;
                 }
-            } catch (e) {
-                console.error('Load data error:', e);
             }
         }
         
         async function loadStats() {
-            try {
-                const res = await fetch('/api/admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'list', password: adminPassword })
-                });
-                const data = await res.json();
-                let total = 0, active = 0, sent = 0;
-                for (const lic of Object.values(data.licenses || {})) {
-                    total++;
-                    if (lic.expiry >= new Date().toISOString().split('T')[0]) active++;
-                    sent += lic.used_count || 0;
-                }
-                document.getElementById('statsCards').innerHTML = `
-                    <div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div>
-                    <div class="stat-card"><div class="stat-number">${active}</div><div>Active Licenses</div></div>
-                    <div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div>
-                `;
-            } catch (e) {
-                console.error('Stats error:', e);
-            }
+            const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) });
+            const data = await res.json();
+            let total=0, active=0, sent=0;
+            for(const lic of Object.values(data.licenses || {})) { total++; if(lic.expiry >= new Date().toISOString().split('T')[0]) active++; sent += lic.used_count||0; }
+            document.getElementById('statsCards').innerHTML = `<div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div><div class="stat-card"><div class="stat-number">${active}</div><div>Active</div></div><div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div>`;
         }
         
         async function loadVisitors() {
-            try {
-                const res = await fetch('/api/visitors');
-                const data = await res.json();
-                document.getElementById('todayVisitors').innerText = data.today || 0;
-                document.getElementById('weekVisitors').innerText = data.week || 0;
-                document.getElementById('monthVisitors').innerText = data.month || 0;
-                document.getElementById('totalVisitors').innerText = data.total || 0;
-                document.getElementById('onlineVisitors').innerText = data.online || 0;
-                
-                const tbody = document.querySelector('#visitorTable tbody');
-                tbody.innerHTML = '';
-                if (data.recent) {
-                    for (const v of data.recent.slice(0, 20)) {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${new Date(v.time).toLocaleString()}</td>
-                                <td>${v.ip}</td>
-                                <td>${v.location || '-'}</td>
-                                <td>${v.page || '/'}</td>
-                            </tr>
-                        `;
-                    }
+            const res = await fetch('/api/visitors');
+            const data = await res.json();
+            document.getElementById('todayVisitors').innerText = data.today||0;
+            document.getElementById('weekVisitors').innerText = data.week||0;
+            document.getElementById('monthVisitors').innerText = data.month||0;
+            document.getElementById('totalVisitors').innerText = data.total||0;
+            document.getElementById('onlineVisitors').innerText = data.online||0;
+            const tbody = document.querySelector('#visitorTable tbody');
+            tbody.innerHTML = '';
+            if(data.recent) {
+                for(const v of data.recent.slice(0,20)) {
+                    tbody.innerHTML += `<tr><td>${new Date(v.time).toLocaleString()}</td><td>${v.ip}</td><td>${v.location||'-'}</td><td>${v.page||'/'}</td></tr>`;
                 }
-            } catch (e) {
-                console.error('Visitors error:', e);
             }
         }
         
         async function loadLiveVisitorStats() {
-            try {
-                const res = await fetch('/api/visitors');
-                const data = await res.json();
-                document.getElementById('liveVisitorStats').innerHTML = `👥 ${data.online || 0} visitors online`;
-            } catch (e) {}
+            const res = await fetch('/api/visitors');
+            const data = await res.json();
+            document.getElementById('liveVisitorStats').innerHTML = `<i class="fas fa-users"></i> ${data.online||0} online`;
         }
         
         async function loadAll() {
@@ -641,7 +522,6 @@
             await loadLiveVisitorStats();
         }
         
-        // Initialize
         toggleCustomFields();
     </script>
 </body>
