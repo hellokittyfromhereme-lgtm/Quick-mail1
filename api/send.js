@@ -14,10 +14,10 @@ export default async function handler(req, res) {
   }
   
   try {
-    const { name, from_email, to_email, subject, message, footer, use_custom } = req.body;
+    const { name, from_email, to_email, subject, html_content } = req.body;
     
     // Validate
-    if (!name || !from_email || !to_email || !subject || !message) {
+    if (!name || !from_email || !to_email || !subject || !html_content) {
       return res.status(400).json({ error: 'Please fill all fields' });
     }
     
@@ -27,40 +27,6 @@ export default async function handler(req, res) {
     }
     if (!emailRegex.test(to_email)) {
       return res.status(400).json({ error: 'Invalid receiver email' });
-    }
-    
-    // Build email body - COMPLETE CUSTOM
-    let emailBody;
-    
-    if (use_custom === 'true') {
-      // User provides complete custom HTML
-      emailBody = message;
-    } else {
-      // User provides message + optional footer
-      let customFooter = '';
-      if (footer && footer.trim()) {
-        customFooter = `
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-            ${footer}
-          </div>
-        `;
-      }
-      
-      emailBody = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            ${message.replace(/\n/g, '<br>')}
-            ${customFooter}
-          </div>
-        </body>
-        </html>
-      `;
     }
     
     // SMTP Configuration
@@ -74,12 +40,12 @@ export default async function handler(req, res) {
       }
     });
     
-    // Send email - Sender shows user's name and email
+    // Send email - NO BRANDING, just user's custom HTML
     const mailOptions = {
       from: `"${name}" <${from_email}>`,
       to: to_email,
       subject: subject,
-      html: emailBody
+      html: html_content  // User's complete custom HTML
     };
     
     await transporter.sendMail(mailOptions);
