@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,7 +14,7 @@ export default async function handler(req, res) {
   }
   
   try {
-    const { name, from_email, to_email, subject, message, use_html } = req.body;
+    const { name, from_email, to_email, subject, message, footer, use_custom } = req.body;
     
     // Validate
     if (!name || !from_email || !to_email || !subject || !message) {
@@ -30,17 +29,37 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid receiver email' });
     }
     
-    // Check if message contains HTML (user wants custom design)
+    // Build email body - COMPLETE CUSTOM
     let emailBody;
-    if (use_html === 'true' || message.includes('<') && message.includes('>')) {
-      // User's own HTML - no branding added
+    
+    if (use_custom === 'true') {
+      // User provides complete custom HTML
       emailBody = message;
     } else {
-      // Plain text - wrap in minimal container
+      // User provides message + optional footer
+      let customFooter = '';
+      if (footer && footer.trim()) {
+        customFooter = `
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            ${footer}
+          </div>
+        `;
+      }
+      
       emailBody = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            ${message.replace(/\n/g, '<br>')}
+            ${customFooter}
+          </div>
+        </body>
+        </html>
       `;
     }
     
@@ -55,7 +74,7 @@ export default async function handler(req, res) {
       }
     });
     
-    // Send email - Sender shows as user's name and email
+    // Send email - Sender shows user's name and email
     const mailOptions = {
       from: `"${name}" <${from_email}>`,
       to: to_email,
@@ -76,13 +95,4 @@ export default async function handler(req, res) {
       error: error.message || 'Failed to send email' 
     });
   }
-}
-
-function escapeHtml(text) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
