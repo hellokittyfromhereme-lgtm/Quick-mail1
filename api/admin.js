@@ -1,12 +1,12 @@
-import fs from 'fs';
-import path from 'path';
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://dibssmtdcishobpdvftg.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYnNzbXRkY2lzaG9icGR2ZnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjQ4OTgsImV4cCI6MjA5MDAwMDg5OH0.lkXURp2-BjAd1AAsR78Vpfpeps0pUYCUz_JnQbmoJRc';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+import fs from 'fs';
+import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const LICENSE_FILE = path.join(DATA_DIR, 'licenses.json');
