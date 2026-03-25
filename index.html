@@ -1,0 +1,277 @@
+!DOCTYPE html
+html lang=en
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    titleQuickMail - Send Emailtitle
+    style
+         {
+            margin 0;
+            padding 0;
+            box-sizing border-box;
+        }
+        body {
+            font-family 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background linear-gradient(135deg, #006a4e 0%, #f42a41 100%);
+            min-height 100vh;
+            display flex;
+            justify-content center;
+            align-items center;
+            padding 20px;
+        }
+        .card {
+            background white;
+            border-radius 20px;
+            padding 40px;
+            max-width 500px;
+            width 100%;
+            box-shadow 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .logo {
+            text-align center;
+            margin-bottom 30px;
+        }
+        .logo h1 {
+            font-size 32px;
+            background linear-gradient(135deg, #006a4e, #f42a41);
+            -webkit-background-clip text;
+            -webkit-text-fill-color transparent;
+        }
+        .badge {
+            text-align center;
+            margin-bottom 25px;
+            padding 8px;
+            background #f0f0f0;
+            border-radius 30px;
+            font-size 14px;
+        }
+        .badge span {
+            color #006a4e;
+            font-weight bold;
+        }
+        .field {
+            margin-bottom 20px;
+        }
+        label {
+            display block;
+            margin-bottom 8px;
+            font-weight 600;
+            color #333;
+        }
+        input, textarea {
+            width 100%;
+            padding 12px 15px;
+            border 2px solid #e0e0e0;
+            border-radius 12px;
+            font-size 14px;
+            font-family inherit;
+        }
+        inputfocus, textareafocus {
+            outline none;
+            border-color #006a4e;
+        }
+        textarea {
+            min-height 100px;
+            resize vertical;
+        }
+        button {
+            width 100%;
+            padding 14px;
+            background linear-gradient(135deg, #006a4e, #f42a41);
+            color white;
+            border none;
+            border-radius 12px;
+            font-size 16px;
+            font-weight 600;
+            cursor pointer;
+        }
+        buttonhover {
+            opacity 0.9;
+        }
+        .loading {
+            position fixed;
+            top 0;
+            left 0;
+            width 100%;
+            height 100%;
+            background rgba(0,0,0,0.8);
+            display none;
+            justify-content center;
+            align-items center;
+            z-index 1000;
+            flex-direction column;
+            gap 15px;
+        }
+        .spinner {
+            width 40px;
+            height 40px;
+            border 4px solid rgba(255,255,255,0.3);
+            border-top-color white;
+            border-radius 50%;
+            animation spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform rotate(360deg); }
+        }
+        .toast {
+            position fixed;
+            bottom 30px;
+            left 50%;
+            transform translateX(-50%);
+            padding 12px 24px;
+            border-radius 30px;
+            color white;
+            font-weight 500;
+            z-index 1001;
+            animation fadeUp 0.3s ease;
+        }
+        .toast.success { background #006a4e; }
+        .toast.error { background #f42a41; }
+        @keyframes fadeUp {
+            from {
+                opacity 0;
+                transform translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity 1;
+                transform translateX(-50%) translateY(0);
+            }
+        }
+        .char-count {
+            text-align right;
+            font-size 12px;
+            color #888;
+            margin-top 5px;
+        }
+        .footer {
+            text-align center;
+            margin-top 25px;
+            font-size 12px;
+            color #888;
+        }
+        small {
+            font-size 11px;
+            color #888;
+        }
+        @media (max-width 550px) {
+            .card { padding 25px; }
+            .logo h1 { font-size 28px; }
+        }
+    style
+head
+body
+    div class=loading id=loading
+        div class=spinnerdiv
+        p style=colorwhite;Sending email...p
+    div
+
+    div class=card
+        div class=logo
+            h1📧 QUICKMAILh1
+        div
+        div class=badge
+            ✨ Made by spanHossainspan  Made in spanBangladeshspan 🇧🇩
+        div
+
+        form id=emailForm
+            div class=field
+                label👤 Your Name label
+                input type=text id=name placeholder=Hossain Mahmud required
+            div
+            div class=field
+                label📧 Your Email label
+                input type=email id=from_email placeholder=you@example.com required
+                smallThis will show as the sender emailsmall
+            div
+            div class=field
+                label🎯 Receiver Email label
+                input type=email id=to_email placeholder=friend@example.com required
+            div
+            div class=field
+                label📌 Subject label
+                input type=text id=subject placeholder=Email subject required
+            div
+            div class=field
+                label💬 Message label
+                textarea id=message placeholder=Write your message... requiredtextarea
+                div class=char-countspan id=charCount0span charactersdiv
+            div
+            button type=submit✈️ Send Emailbutton
+        form
+        div class=footer
+            ⚡ Powered by Gmail SMTP • Made in Bangladesh
+        div
+    div
+
+    script
+         Character counter
+        const messageField = document.getElementById('message');
+        const charCount = document.getElementById('charCount');
+        messageField.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+
+        function validateEmail(email) {
+            return ^[^s@]+@([^s@]+.)+[^s@]+$.test(email);
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() = toast.remove(), 4000);
+        }
+
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const from_email = document.getElementById('from_email').value.trim();
+            const to_email = document.getElementById('to_email').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            if (!name  !from_email  !to_email  !subject  !message) {
+                showToast('❌ Please fill all fields!', 'error');
+                return;
+            }
+            
+            if (!validateEmail(from_email)) {
+                showToast('❌ Invalid sender email!', 'error');
+                return;
+            }
+            
+            if (!validateEmail(to_email)) {
+                showToast('❌ Invalid receiver email!', 'error');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'flex';
+            
+            try {
+                const response = await fetch('apisend', {
+                    method 'POST',
+                    headers { 'Content-Type' 'applicationjson' },
+                    body JSON.stringify({ name, from_email, to_email, subject, message })
+                });
+                
+                const result = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    document.getElementById('emailForm').reset();
+                    charCount.textContent = '0';
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showToast('❌ Network error! Please try again.', 'error');
+                console.error(error);
+            }
+        });
+    script
+body
+html
