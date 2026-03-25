@@ -3,169 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickMail - Professional Email Designer</title>
+    <title>QuickMail Pro - Premium Email Designer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #006a4e 0%, #f42a41 100%);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            background: #0a0a0a;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Video Background */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            opacity: 0.4;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,106,78,0.85), rgba(244,42,65,0.85));
+            z-index: -1;
+        }
+
+        /* Animated Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            50% { transform: translateY(-100px) translateX(50px); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
             padding: 20px;
             position: relative;
+            z-index: 1;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .card {
-            background: white;
-            border-radius: 28px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 55px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.4);
         }
-        .logo h1 {
-            font-size: 36px;
-            background: linear-gradient(135deg, #006a4e, #f42a41);
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #ffd700);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
+            text-shadow: 0 0 30px rgba(255,215,0,0.3);
         }
+
         .badge {
-            text-align: center;
-            padding: 10px;
-            background: #f0f0f0;
+            display: inline-block;
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            padding: 8px 24px;
             border-radius: 40px;
-            margin: 15px 0;
+            color: white;
             font-size: 14px;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
         }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+        }
+
+        /* Stats Bar */
         .stats-bar {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
+
         .stat-item {
-            background: linear-gradient(135deg, #006a4e, #f42a41);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 50px;
             color: white;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 14px;
+            font-weight: 500;
+            animation: fadeInUp 0.6s ease;
+            transition: all 0.3s;
         }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Two Columns Layout */
         .two-columns {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
+
+        /* Section Title */
+        .section-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 28px;
+        }
+
+        /* Template Grid */
         .template-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
-            margin-top: 15px;
             max-height: 600px;
             overflow-y: auto;
             padding: 5px;
         }
+
+        .template-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .template-grid::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .template-grid::-webkit-scrollbar-thumb {
+            background: #f42a41;
+            border-radius: 10px;
+        }
+
         .template-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 16px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s;
-            background: white;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.5s ease;
         }
+
         .template-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-color: #006a4e;
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255,215,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
+
         .template-card.selected {
-            border-color: #006a4e;
-            box-shadow: 0 0 0 3px rgba(0,106,78,0.3);
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
         }
+
         .template-card img {
             width: 100%;
             height: 160px;
             object-fit: cover;
+            transition: transform 0.5s;
         }
+
+        .template-card:hover img {
+            transform: scale(1.05);
+        }
+
         .template-card .info {
-            padding: 12px;
+            padding: 15px;
         }
+
         .template-card h4 {
+            color: white;
             font-size: 16px;
             margin-bottom: 5px;
         }
+
         .template-card p {
+            color: rgba(255,255,255,0.7);
             font-size: 12px;
-            color: #666;
         }
-        .field {
-            margin-bottom: 18px;
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
         }
+
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 500;
             font-size: 14px;
         }
+
+        label i {
+            margin-right: 8px;
+            color: #ffd700;
+        }
+
         input, textarea, select {
             width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-family: inherit;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            color: white;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
         }
-        input:focus, textarea:focus {
+
+        input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: #006a4e;
+            border-color: #ffd700;
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
         }
-        .variable-group {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255,255,255,0.5);
         }
+
+        /* Image Upload */
         .image-upload {
-            border: 2px dashed #006a4e;
-            border-radius: 12px;
-            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 16px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
-            background: #f9f9f9;
+            transition: all 0.3s;
         }
+
         .image-upload:hover {
-            background: #f0f0f0;
+            background: rgba(255,255,255,0.15);
+            border-color: #ffd700;
         }
+
+        /* Variable Groups */
+        .variable-group {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .variable-group:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateX(5px);
+        }
+
+        /* Preview Area */
         .preview {
-            background: #f5f5f5;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
             padding: 20px;
-            border-radius: 12px;
             margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
             max-height: 400px;
             overflow: auto;
-            border: 1px solid #e0e0e0;
         }
-        button {
+
+        .preview strong {
+            color: #ffd700;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Button */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
             background: linear-gradient(135deg, #006a4e, #f42a41);
-            color: white;
             border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 40px;
+            color: white;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
             width: 100%;
-            transition: transform 0.2s;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
         }
-        button:hover {
-            transform: scale(1.02);
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(244,42,65,0.4);
+        }
+
         /* Bottom Icons */
         .bottom-icons {
             position: fixed;
@@ -173,8 +372,9 @@
             right: 30px;
             display: flex;
             gap: 15px;
-            z-index: 999;
+            z-index: 100;
         }
+
         .icon-circle {
             width: 55px;
             height: 55px;
@@ -190,9 +390,12 @@
             font-size: 24px;
             text-decoration: none;
         }
+
         .icon-circle:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
+
         /* Modal */
         .modal {
             display: none;
@@ -201,177 +404,298 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease;
         }
+
         .modal-content {
-            background: white;
-            border-radius: 28px;
-            padding: 30px;
-            width: 400px;
+            background: linear-gradient(135deg, rgba(0,106,78,0.95), rgba(244,42,65,0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 40px;
+            width: 450px;
             max-width: 90%;
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: scaleIn 0.4s ease;
         }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
         .modal-content input, .modal-content textarea {
+            background: rgba(255,255,255,0.2);
             margin: 10px 0;
         }
+
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 100px;
             right: 30px;
-            padding: 12px 24px;
-            border-radius: 30px;
+            padding: 14px 28px;
+            border-radius: 50px;
             color: white;
             z-index: 1001;
-            animation: slideIn 0.3s ease;
+            animation: slideInRight 0.3s ease;
         }
+
         .toast.success { background: #006a4e; }
         .toast.error { background: #f42a41; }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
+
+        /* Loading */
         .loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1002;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
+
         .spinner {
-            width: 45px;
-            height: 45px;
+            width: 60px;
+            height: 60px;
             border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            border-top-color: #ffd700;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 900px) {
-            .two-columns { grid-template-columns: 1fr; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .logo {
+                font-size: 32px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Bottom Icons: Admin + Telegram + Contact -->
+    <!-- Video Background -->
+    <video class="video-bg" autoplay loop muted playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-digital-wave-32220-large.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Bottom Icons -->
     <div class="bottom-icons">
-        <div class="icon-circle" onclick="openAdminModal()">👤</div>
-        <a href="https://t.me/CyperXPloit" target="_blank" class="icon-circle">📨</a>
-        <div class="icon-circle" onclick="openContactModal()">💬</div>
+        <div class="icon-circle" onclick="openAdminModal()">
+            <i class="fas fa-crown"></i>
+        </div>
+        <a href="https://t.me/CyperXPloit" target="_blank" class="icon-circle">
+            <i class="fab fa-telegram-plane"></i>
+        </a>
+        <div class="icon-circle" onclick="openContactModal()">
+            <i class="fas fa-headset"></i>
+        </div>
     </div>
 
-    <!-- Admin Password Modal -->
+    <!-- Admin Modal -->
     <div id="adminModal" class="modal">
         <div class="modal-content">
-            <h2 style="color: #006a4e;">🔐 Admin Access</h2>
-            <input type="password" id="adminPassword" placeholder="Enter password">
-            <button onclick="verifyAdmin()">Login</button>
-            <p style="margin-top: 10px; font-size: 12px; color: #888;">Contact admin for password</p>
+            <h2><i class="fas fa-crown"></i> Admin Access</h2>
+            <input type="password" id="adminPassword" placeholder="Enter master password">
+            <button class="btn-primary" onclick="verifyAdmin()" style="margin-top: 15px;">Unlock Access</button>
         </div>
     </div>
 
     <!-- Contact Modal -->
     <div id="contactModal" class="modal">
         <div class="modal-content">
-            <h2 style="color: #006a4e;">💬 Contact Support</h2>
+            <h2><i class="fas fa-headset"></i> Support Center</h2>
             <input type="text" id="contactName" placeholder="Your Name">
             <input type="email" id="contactEmail" placeholder="Your Email">
-            <textarea id="contactMessage" rows="4" placeholder="Describe your problem..."></textarea>
-            <button onclick="sendContact()">Send Message</button>
-            <p style="margin-top: 10px; font-size: 12px;">Or message directly on <a href="https://t.me/CyperXPloit" target="_blank">Telegram @CyperXPloit</a></p>
+            <textarea id="contactMessage" rows="4" placeholder="Describe your issue..."></textarea>
+            <button class="btn-primary" onclick="sendContact()">Send Message</button>
+            <p style="margin-top: 15px; color: rgba(255,255,255,0.7);">Or reach us on <a href="https://t.me/CyperXPloit" target="_blank" style="color:#ffd700;">Telegram @CyperXPloit</a></p>
         </div>
     </div>
 
     <div class="loading" id="loading">
         <div class="spinner"></div>
-        <p style="color:white;">Sending email...</p>
+        <p style="color:white;">Sending premium email...</p>
     </div>
 
     <div class="container">
-        <div class="card">
-            <div class="logo">
-                <h1>📧 QUICKMAIL</h1>
-            </div>
+        <div class="header">
+            <h1 class="logo">⚡ QUICKMAIL PRO</h1>
             <div class="badge">
-                ✨ Made by Hossain | Made in Bangladesh 🇧🇩
+                <i class="fas fa-gem"></i> Premium Email Designer
             </div>
-            
-            <!-- Statistics Bar -->
-            <div class="stats-bar" id="statsBar">
-                <div class="stat-item">📊 Loading stats...</div>
-            </div>
+        </div>
 
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item"><i class="fas fa-spinner fa-pulse"></i> Loading stats...</div>
+        </div>
+
+        <div class="glass-card" style="padding: 30px;">
             <div class="two-columns">
                 <!-- Left: Templates -->
                 <div>
-                    <h3>🎨 Choose Template</h3>
+                    <div class="section-title">
+                        <i class="fas fa-palette"></i>
+                        <span>Premium Templates</span>
+                    </div>
                     <div id="templateGrid" class="template-grid"></div>
                 </div>
 
                 <!-- Right: Form -->
                 <div>
-                    <div class="field">
-                        <label>🔑 License Key *</label>
+                    <div class="section-title">
+                        <i class="fas fa-edit"></i>
+                        <span>Compose Email</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-key"></i> License Key *</label>
                         <input type="text" id="license" placeholder="Enter your license key">
                     </div>
-                    <div class="field">
-                        <label>👤 Your Name *</label>
-                        <input type="text" id="name" placeholder="Hossain Mahmud">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Sender Name *</label>
+                        <input type="text" id="name" placeholder="John Doe">
                     </div>
-                    <div class="field">
-                        <label>📧 Your Email *</label>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Your Email *</label>
                         <input type="email" id="from_email" placeholder="you@example.com">
                     </div>
-                    <div class="field">
-                        <label>🎯 Receiver Email *</label>
+                    <div class="form-group">
+                        <label><i class="fas fa-user-friends"></i> Receiver Email *</label>
                         <input type="email" id="to_email" placeholder="friend@example.com">
                     </div>
-                    <div class="field">
-                        <label>📌 Subject *</label>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Subject *</label>
                         <input type="text" id="subject" placeholder="Email subject">
                     </div>
                     
-                    <!-- Image Upload for Template -->
-                    <div class="field">
-                        <label>🖼️ Upload Image (Optional)</label>
+                    <div class="form-group">
+                        <label><i class="fas fa-image"></i> Upload Image (Optional)</label>
                         <div class="image-upload" onclick="document.getElementById('imageInput').click()">
-                            📸 Click to upload image from gallery
+                            <i class="fas fa-cloud-upload-alt"></i> Click to upload from gallery
                             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                         </div>
                         <div id="imagePreview" style="margin-top: 10px; display: none;">
                             <img id="uploadedImage" style="max-width: 100%; border-radius: 12px;">
-                            <button type="button" onclick="removeImage()" style="margin-top: 5px; background:#f42a41; padding: 5px;">Remove</button>
+                            <button onclick="removeImage()" style="margin-top: 8px; background: #f42a41; padding: 6px 12px; border: none; border-radius: 20px; color: white; cursor: pointer;">Remove</button>
                         </div>
                     </div>
                     
                     <div id="variablesContainer"></div>
                     
-                    <div class="preview" id="previewArea">
-                        <strong>📱 Live Preview</strong>
-                        <div id="previewContent">Select a template to see preview</div>
+                    <div class="preview">
+                        <strong><i class="fas fa-eye"></i> Live Preview</strong>
+                        <div id="previewContent" style="margin-top: 12px;">Select a template to see preview</div>
                     </div>
                     
-                    <button id="sendBtn">✈️ Send Email</button>
+                    <button class="btn-primary" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Create particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = Math.random() * 15 + 10 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+
         let templates = {};
         let selectedTemplate = null;
         let variableValues = {};
         let uploadedImageUrl = '';
-        
+
         async function loadTemplates() {
             try {
                 const res = await fetch('/api/templates');
@@ -379,7 +703,7 @@
                 renderTemplates();
             } catch(e) { console.error(e); }
         }
-        
+
         function renderTemplates() {
             const grid = document.getElementById('templateGrid');
             grid.innerHTML = '';
@@ -393,14 +717,14 @@
                         <div class="info">
                             <h4>${t.name}</h4>
                             <p>${t.title}</p>
-                            <small>${category}</small>
+                            <small style="color:rgba(255,255,255,0.5);">${category}</small>
                         </div>
                     `;
                     grid.appendChild(card);
                 }
             }
         }
-        
+
         function selectTemplate(template) {
             selectedTemplate = template;
             document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
@@ -410,14 +734,14 @@
             }
             
             const container = document.getElementById('variablesContainer');
-            container.innerHTML = '<h3>✏️ Customize Content</h3>';
+            container.innerHTML = '<div class="section-title" style="font-size: 18px; margin-top: 10px;"><i class="fas fa-sliders-h"></i> Customize Content</div>';
             variableValues = {};
             
             for (const varName of template.variables) {
                 const div = document.createElement('div');
                 div.className = 'variable-group';
                 div.innerHTML = `
-                    <label>${varName.replace(/_/g, ' ')}</label>
+                    <label style="font-size: 12px;">${varName.replace(/_/g, ' ')}</label>
                     <input type="text" id="var_${varName}" placeholder="Enter ${varName.replace(/_/g, ' ')}" value="{{${varName}}}">
                 `;
                 container.appendChild(div);
@@ -431,7 +755,7 @@
             }
             updatePreview();
         }
-        
+
         function updatePreview() {
             if (!selectedTemplate) return;
             let html = selectedTemplate.html;
@@ -444,7 +768,7 @@
             }
             document.getElementById('previewContent').innerHTML = html;
         }
-        
+
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -459,35 +783,35 @@
                 reader.readAsDataURL(file);
             }
         }
-        
+
         function removeImage() {
             uploadedImageUrl = '';
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('imageInput').value = '';
             updatePreview();
         }
-        
+
         function showToast(msg, type) {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            toast.innerText = msg;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         }
-        
+
         async function loadStats() {
             try {
                 const res = await fetch('/api/stats');
                 const stats = await res.json();
                 document.getElementById('statsBar').innerHTML = `
-                    <div class="stat-item">🔑 ${stats.totalLicenses || 0} Licenses</div>
-                    <div class="stat-item">✅ ${stats.activeLicenses || 0} Active</div>
-                    <div class="stat-item">📧 ${stats.totalEmails || 0} Emails Sent</div>
-                    <div class="stat-item">👥 ${stats.totalUsers || 0} Users</div>
+                    <div class="stat-item"><i class="fas fa-key"></i> ${stats.totalLicenses || 0} Licenses</div>
+                    <div class="stat-item"><i class="fas fa-check-circle"></i> ${stats.activeLicenses || 0} Active</div>
+                    <div class="stat-item"><i class="fas fa-envelope"></i> ${stats.totalEmails || 0} Sent</div>
+                    <div class="stat-item"><i class="fas fa-users"></i> ${stats.totalUsers || 0} Users</div>
                 `;
             } catch(e) { console.error(e); }
         }
-        
+
         document.getElementById('sendBtn').addEventListener('click', async () => {
             const license = document.getElementById('license').value.trim();
             const name = document.getElementById('name').value.trim();
@@ -530,15 +854,15 @@
                 showToast('Network error!', 'error');
             }
         });
-        
+
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
         }
-        
+
         function openContactModal() {
             document.getElementById('contactModal').style.display = 'flex';
         }
-        
+
         function verifyAdmin() {
             const password = document.getElementById('adminPassword').value;
             if (password === '##Hossain##1') {
@@ -548,7 +872,7 @@
                 showToast('❌ Wrong password!', 'error');
             }
         }
-        
+
         async function sendContact() {
             const name = document.getElementById('contactName').value;
             const email = document.getElementById('contactEmail').value;
@@ -572,7 +896,7 @@
                 showToast('Failed to send', 'error');
             }
         }
-        
+
         window.onclick = function(event) {
             if (event.target === document.getElementById('adminModal')) {
                 document.getElementById('adminModal').style.display = 'none';
@@ -581,7 +905,7 @@
                 document.getElementById('contactModal').style.display = 'none';
             }
         };
-        
+
         loadTemplates();
         loadStats();
         setInterval(loadStats, 30000);
