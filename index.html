@@ -14,22 +14,21 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #006a4e 0%, #f42a41 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
         .card {
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 500px;
-            width: 100%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .logo {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         .logo h1 {
             font-size: 32px;
@@ -71,8 +70,30 @@
             border-color: #006a4e;
         }
         textarea {
-            min-height: 100px;
+            min-height: 150px;
             resize: vertical;
+            font-family: monospace;
+        }
+        .mode-switch {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 40px;
+        }
+        .mode-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            color: white;
         }
         button {
             width: 100%;
@@ -153,6 +174,14 @@
             font-size: 11px;
             color: #888;
         }
+        .html-hint {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
         @media (max-width: 550px) {
             .card { padding: 25px; }
             .logo h1 { font-size: 28px; }
@@ -165,45 +194,77 @@
         <p style="color:white;">Sending email...</p>
     </div>
 
-    <div class="card">
-        <div class="logo">
-            <h1>📧 QUICKMAIL</h1>
-        </div>
-        <div class="badge">
-            ✨ Made by <span>Hossain</span> | Made in <span>Bangladesh</span> 🇧🇩
-        </div>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <h1>📧 QUICKMAIL</h1>
+            </div>
+            <div class="badge">
+                ✨ Made by <span>Hossain</span> | Made in <span>Bangladesh</span> 🇧🇩
+            </div>
 
-        <form id="emailForm">
-            <div class="field">
-                <label>👤 Your Name *</label>
-                <input type="text" id="name" placeholder="Hossain Mahmud" required>
+            <div class="mode-switch">
+                <div class="mode-btn active" data-mode="text">📝 Plain Text</div>
+                <div class="mode-btn" data-mode="html">🎨 HTML / Custom</div>
             </div>
-            <div class="field">
-                <label>📧 Your Email *</label>
-                <input type="email" id="from_email" placeholder="you@example.com" required>
-                <small>This will show as the sender email</small>
+
+            <form id="emailForm">
+                <div class="field">
+                    <label>👤 Your Name *</label>
+                    <input type="text" id="name" placeholder="Hossain Mahmud" required>
+                </div>
+                <div class="field">
+                    <label>📧 Your Email *</label>
+                    <input type="email" id="from_email" placeholder="you@example.com" required>
+                    <small>This will show as the sender email</small>
+                </div>
+                <div class="field">
+                    <label>🎯 Receiver Email *</label>
+                    <input type="email" id="to_email" placeholder="friend@example.com" required>
+                </div>
+                <div class="field">
+                    <label>📌 Subject *</label>
+                    <input type="text" id="subject" placeholder="Email subject" required>
+                </div>
+                <div class="field">
+                    <label>💬 Message *</label>
+                    <textarea id="message" placeholder="Write your message..." required></textarea>
+                    <div class="char-count"><span id="charCount">0</span> characters</div>
+                    <div class="html-hint" id="htmlHint" style="display: none;">
+                        💡 HTML Mode: You can use any HTML/CSS. Example:<br>
+                        <code>&lt;h1 style="color:red"&gt;Hello&lt;/h1&gt;</code><br>
+                        <code>&lt;img src="https://example.com/image.jpg"&gt;</code>
+                    </div>
+                </div>
+                <button type="submit">✈️ Send Email</button>
+            </form>
+            <div class="footer">
+                ⚡ No branding • Full HTML support • Made in Bangladesh
             </div>
-            <div class="field">
-                <label>🎯 Receiver Email *</label>
-                <input type="email" id="to_email" placeholder="friend@example.com" required>
-            </div>
-            <div class="field">
-                <label>📌 Subject *</label>
-                <input type="text" id="subject" placeholder="Email subject" required>
-            </div>
-            <div class="field">
-                <label>💬 Message *</label>
-                <textarea id="message" placeholder="Write your message..." required></textarea>
-                <div class="char-count"><span id="charCount">0</span> characters</div>
-            </div>
-            <button type="submit">✈️ Send Email</button>
-        </form>
-        <div class="footer">
-            ⚡ Powered by Gmail SMTP • Made in Bangladesh
         </div>
     </div>
 
     <script>
+        // Mode switching
+        let currentMode = 'text';
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                
+                const htmlHint = document.getElementById('htmlHint');
+                if (currentMode === 'html') {
+                    htmlHint.style.display = 'block';
+                    document.getElementById('message').placeholder = '<h1>Your Heading</h1>\n<p>Your message with <strong>HTML</strong>...</p>\n<img src="https://example.com/image.jpg">';
+                } else {
+                    htmlHint.style.display = 'none';
+                    document.getElementById('message').placeholder = 'Write your message here...';
+                }
+            });
+        });
+        
         // Character counter
         const messageField = document.getElementById('message');
         const charCount = document.getElementById('charCount');
@@ -230,7 +291,7 @@
             const from_email = document.getElementById('from_email').value.trim();
             const to_email = document.getElementById('to_email').value.trim();
             const subject = document.getElementById('subject').value.trim();
-            const message = document.getElementById('message').value.trim();
+            let message = document.getElementById('message').value;
             
             if (!name || !from_email || !to_email || !subject || !message) {
                 showToast('❌ Please fill all fields!', 'error');
@@ -253,7 +314,14 @@
                 const response = await fetch('/api/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, from_email, to_email, subject, message })
+                    body: JSON.stringify({ 
+                        name, 
+                        from_email, 
+                        to_email, 
+                        subject, 
+                        message,
+                        use_html: currentMode === 'html' ? 'true' : 'false'
+                    })
                 });
                 
                 const result = await response.json();
