@@ -30,9 +30,9 @@ export default async function handler(req, res) {
       .insert({
         garena_id: claimData.garenaId,
         email: claimData.email,
-        ip: claimData.ip,
-        user_agent: claimData.userAgent,
-        claimed_at: claimData.timestamp
+        ip: claimData.ip || null,
+        user_agent: claimData.userAgent || null,
+        claimed_at: claimData.timestamp || new Date().toISOString()
       });
     
     if (error) {
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ success: false, error: error.message });
     }
     
-    // Send email notification to you
+    // Send email notification
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
@@ -61,7 +61,9 @@ export default async function handler(req, res) {
         <p><strong>Email:</strong> ${claimData.email}</p>
         <p><strong>IP:</strong> ${claimData.ip || 'Unknown'}</p>
         <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-        <p><strong>User Agent:</strong> ${claimData.userAgent}</p>
+        <p><strong>User Agent:</strong> ${claimData.userAgent || 'Unknown'}</p>
+        <hr>
+        <p>Process this claim in Garena system.</p>
       `
     });
     
