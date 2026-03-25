@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - QuickMail</title>
+    <title>QuickMail Admin</title>
     <style>
         * {
             margin: 0;
@@ -12,27 +12,35 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e;
-            padding: 20px;
+            background: #0f172a;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #006a4e, #f42a41);
         }
         .login-box {
-            max-width: 400px;
-            margin: 100px auto;
             background: white;
             padding: 40px;
-            border-radius: 20px;
+            border-radius: 28px;
+            width: 350px;
             text-align: center;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+        }
+        .login-box h2 {
+            color: #006a4e;
+            margin-bottom: 20px;
         }
         .login-box input {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
         }
         .login-box button {
             width: 100%;
@@ -40,19 +48,121 @@
             background: linear-gradient(135deg, #006a4e, #f42a41);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-size: 16px;
             cursor: pointer;
         }
         .dashboard {
             display: none;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #006a4e, #f42a41);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+        }
+        .tab-content.active {
+            display: block;
         }
         .card {
-            background: white;
-            border-radius: 15px;
+            background: #f8fafc;
+            border-radius: 16px;
             padding: 20px;
             margin-bottom: 20px;
         }
-        .stats {
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+        }
+        button {
+            background: #006a4e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .template-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .template-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        .template-card .info {
+            padding: 15px;
+        }
+        .template-card h4 {
+            margin-bottom: 5px;
+        }
+        .template-card p {
+            font-size: 12px;
+            color: #666;
+        }
+        .delete-btn {
+            background: #f42a41;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .license-code {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
@@ -62,184 +172,137 @@
             background: linear-gradient(135deg, #006a4e, #f42a41);
             color: white;
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 16px;
             text-align: center;
         }
         .stat-number {
             font-size: 32px;
             font-weight: bold;
         }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-        }
-        button {
-            background: #006a4e;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #f5f5f5;
-        }
-        .license-code {
-            font-family: monospace;
-            background: #f0f0f0;
-            padding: 2px 5px;
-            border-radius: 4px;
-        }
-        .delete-btn {
-            background: #f42a41;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 10px 20px;
-            background: #f0f0f0;
-            cursor: pointer;
-            border-radius: 10px;
-        }
-        .tab.active {
-            background: #006a4e;
-            color: white;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
         @media (max-width: 768px) {
-            table { font-size: 12px; }
-            th, td { padding: 8px; }
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Form -->
-        <div id="loginForm" class="login-box">
-            <h2>🔐 Admin Login</h2>
-            <input type="password" id="adminPass" placeholder="Enter admin password">
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <h2>🔐 Admin Access</h2>
+            <input type="password" id="adminPass" placeholder="Enter password">
             <button onclick="login()">Login</button>
         </div>
+    </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard">
-            <h1 style="color: white; margin-bottom: 20px;">📊 QuickMail Admin Panel</h1>
-            
-            <div class="nav-tabs">
-                <div class="tab active" onclick="showTab('licenses')">🔑 Licenses</div>
-                <div class="tab" onclick="showTab('generate')">✨ Generate License</div>
-                <div class="tab" onclick="showTab('data')">📁 Collected Data</div>
-                <div class="tab" onclick="showTab('stats')">📈 Statistics</div>
+    <div id="dashboard" class="dashboard">
+        <div class="header">
+            <h1>📊 QuickMail Admin Panel</h1>
+            <button onclick="logout()" style="background:#f42a41;">Logout</button>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="tab active" onclick="showTab('licenses')">🔑 Licenses</div>
+            <div class="tab" onclick="showTab('generate')">✨ Generate License</div>
+            <div class="tab" onclick="showTab('templates')">🎨 Templates</div>
+            <div class="tab" onclick="showTab('upload')">📤 Upload Template</div>
+            <div class="tab" onclick="showTab('data')">📁 Collected Data</div>
+            <div class="tab" onclick="showTab('stats')">📈 Statistics</div>
+        </div>
+
+        <!-- Licenses Tab -->
+        <div id="licensesTab" class="tab-content active">
+            <h3>📋 All Licenses</h3>
+            <div style="overflow-x: auto;">
+                <table id="licensesTable">
+                    <thead><tr><th>License Key</th><th>Type</th><th>Expiry</th><th>Max</th><th>Used</th><th>Used By</th><th>Action</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
-            
-            <!-- Licenses Tab -->
-            <div id="licensesTab" class="tab-content active">
-                <div class="card">
-                    <h3>📋 All Licenses</h3>
-                    <div style="overflow-x: auto;">
-                        <table id="licensesTable">
-                            <thead>
-                                <tr><th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th></tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Generate License Tab -->
+        <div id="generateTab" class="tab-content">
+            <h3>✨ Generate New License</h3>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-number">7-365</div><div>Days</div></div>
+                <div class="stat-card"><div class="stat-number">10-∞</div><div>Email Limit</div></div>
             </div>
-            
-            <!-- Generate License Tab -->
-            <div id="generateTab" class="tab-content">
-                <div class="card">
-                    <h3>✨ Generate New License</h3>
-                    <div class="stats">
-                        <div class="stat-card">
-                            <div class="stat-number">7-365</div>
-                            <div>Days Range</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">10-∞</div>
-                            <div>Email Limit</div>
-                        </div>
-                    </div>
-                    <label>License Type:</label>
-                    <select id="licenseType">
-                        <option value="Trial">Trial (7 days, 10 emails)</option>
-                        <option value="Monthly">Monthly (30 days, 100 emails)</option>
-                        <option value="Premium">Premium (90 days, 500 emails)</option>
-                        <option value="Pro">Pro (180 days, 2000 emails)</option>
-                        <option value="Lifetime">Lifetime (365 days, Unlimited)</option>
-                        <option value="Custom">Custom</option>
+            <div class="card">
+                <label>License Type:</label>
+                <select id="licenseType">
+                    <option value="Trial">Trial (7 days, 10 emails)</option>
+                    <option value="Monthly">Monthly (30 days, 100 emails)</option>
+                    <option value="Premium">Premium (90 days, 500 emails)</option>
+                    <option value="Pro">Pro (180 days, 2000 emails)</option>
+                    <option value="Lifetime">Lifetime (365 days, Unlimited)</option>
+                    <option value="Custom">Custom</option>
+                </select>
+                <div id="customFields" style="display: none;">
+                    <label>Days:</label>
+                    <input type="number" id="customDays" value="30">
+                    <label>Max Emails:</label>
+                    <select id="customMaxEmails">
+                        <option value="10">10</option><option value="50">50</option><option value="100">100</option>
+                        <option value="500">500</option><option value="1000">1000</option><option value="unlimited">Unlimited</option>
                     </select>
-                    
-                    <div id="customFields" style="display: none;">
-                        <label>Days:</label>
-                        <input type="number" id="customDays" value="30">
-                        <label>Max Emails:</label>
-                        <select id="customMaxEmails">
-                            <option value="10">10</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="500">500</option>
-                            <option value="1000">1000</option>
-                            <option value="5000">5000</option>
-                            <option value="unlimited">Unlimited</option>
-                        </select>
-                    </div>
-                    
-                    <button onclick="generateLicense()" style="margin-top: 15px;">🔑 Generate License</button>
-                    
-                    <div id="newLicense" style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; display: none;">
-                        <strong>✅ New License Created!</strong><br>
-                        <code id="licenseKeyDisplay" style="font-size: 16px;"></code>
-                        <button onclick="copyLicense()" style="margin-top: 10px; background: #006a4e;">📋 Copy License</button>
-                    </div>
+                </div>
+                <button onclick="generateLicense()" style="margin-top:15px;">🔑 Generate License</button>
+                <div id="newLicense" style="margin-top:20px;padding:15px;background:#e8f5e9;border-radius:12px;display:none;">
+                    <strong>✅ New License Created!</strong><br>
+                    <code id="licenseKeyDisplay" style="font-size:16px;"></code>
+                    <button onclick="copyLicense()" style="margin-top:10px;">📋 Copy</button>
                 </div>
             </div>
-            
-            <!-- Collected Data Tab -->
-            <div id="dataTab" class="tab-content">
-                <div class="card">
-                    <h3>📁 Collected User Data</h3>
-                    <div style="overflow-x: auto;">
-                        <table id="dataTable">
-                            <thead>
-                                <tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>Device</th><th>License</th></tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Templates Tab -->
+        <div id="templatesTab" class="tab-content">
+            <h3>🎨 All Templates</h3>
+            <div id="templatesGrid" class="template-grid"></div>
+        </div>
+
+        <!-- Upload Template Tab -->
+        <div id="uploadTab" class="tab-content">
+            <h3>📤 Upload Custom Template</h3>
+            <div class="card">
+                <label>Template Name:</label>
+                <input type="text" id="templateName" placeholder="e.g., Summer Sale">
+                <label>Category:</label>
+                <select id="templateCategory">
+                    <option value="business">Business</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="personal">Personal</option>
+                    <option value="ecommerce">E-Commerce</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <label>Title/Description:</label>
+                <input type="text" id="templateTitle" placeholder="Short description">
+                <label>Template Image:</label>
+                <input type="file" id="templateImage" accept="image/*">
+                <label>HTML Code:</label>
+                <textarea id="templateHtml" rows="12" placeholder="<div>Your HTML template here...</div>"></textarea>
+                <label>Variables (comma separated):</label>
+                <input type="text" id="templateVariables" placeholder="NAME, EMAIL, LINK">
+                <button onclick="uploadTemplate()">📤 Upload Template</button>
             </div>
-            
-            <!-- Statistics Tab -->
-            <div id="statsTab" class="tab-content">
-                <div class="card">
-                    <h3>📈 Statistics</h3>
-                    <div class="stats" id="statsCards"></div>
-                </div>
+        </div>
+
+        <!-- Data Tab -->
+        <div id="dataTab" class="tab-content">
+            <h3>📁 Collected User Data</h3>
+            <div style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead><tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>License</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="statsTab" class="tab-content">
+            <h3>📈 Statistics</h3>
+            <div id="statsCards" class="stats-grid"></div>
         </div>
     </div>
 
@@ -247,57 +310,60 @@
         let adminPassword = '';
         
         function login() {
-            adminPassword = document.getElementById('adminPass').value;
-            if (adminPassword) {
-                document.getElementById('loginForm').style.display = 'none';
+            const pass = document.getElementById('adminPass').value;
+            if (pass === '##Hossain##') {
+                adminPassword = pass;
+                document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                loadData();
+                loadAllData();
+            } else {
+                alert('Wrong password!');
             }
+        }
+        
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            adminPassword = '';
         }
         
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            if (tab === 'licenses') {
-                document.querySelector('.tab').classList.add('active');
-                document.getElementById('licensesTab').classList.add('active');
-            } else if (tab === 'generate') {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('generateTab').classList.add('active');
-            } else if (tab === 'data') {
-                document.querySelectorAll('.tab')[2].classList.add('active');
-                document.getElementById('dataTab').classList.add('active');
-                loadCollectedData();
-            } else if (tab === 'stats') {
-                document.querySelectorAll('.tab')[3].classList.add('active');
-                document.getElementById('statsTab').classList.add('active');
-                loadStats();
-            }
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            if (tab === 'templates') loadTemplates();
+            if (tab === 'data') loadCollectedData();
+            if (tab === 'stats') loadStats();
         }
         
-        async function loadData() {
-            const response = await fetch('/api/admin', {
+        async function loadAllData() {
+            await loadLicenses();
+            await loadTemplates();
+            await loadCollectedData();
+            await loadStats();
+        }
+        
+        async function loadLicenses() {
+            const res = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'list', password: adminPassword })
             });
-            const data = await response.json();
-            
+            const data = await res.json();
             const tbody = document.querySelector('#licensesTable tbody');
             tbody.innerHTML = '';
-            
             for (const [key, lic] of Object.entries(data.licenses)) {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td><code>${key}</code></td>
-                    <td>${lic.type}</td>
-                    <td>${lic.created.split('T')[0]}</td>
-                    <td>${lic.expiry}</td>
-                    <td>${lic.max_emails === -1 ? '∞' : lic.max_emails}</td>
-                    <td>${lic.used_count || 0}</td>
-                    <td>${lic.used_by || '-'}</td>
-                    <td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td>
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${key}</code></td>
+                        <td>${lic.type}</td>
+                        <td>${lic.expiry}</td>
+                        <td>${lic.max_emails === -1 ? '∞' : lic.max_emails}</td>
+                        <td>${lic.used_count || 0}</td>
+                        <td>${lic.used_by || '-'}</td>
+                        <td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td>
+                    </tr>
                 `;
             }
         }
@@ -305,89 +371,131 @@
         async function generateLicense() {
             const type = document.getElementById('licenseType').value;
             let days, max_emails;
-            
             if (type === 'Custom') {
                 days = document.getElementById('customDays').value;
                 max_emails = document.getElementById('customMaxEmails').value;
             } else {
-                const presets = {
-                    'Trial': [7, 10],
-                    'Monthly': [30, 100],
-                    'Premium': [90, 500],
-                    'Pro': [180, 2000],
-                    'Lifetime': [365, 'unlimited']
-                };
+                const presets = { 'Trial': [7,10], 'Monthly': [30,100], 'Premium': [90,500], 'Pro': [180,2000], 'Lifetime': [365,'unlimited'] };
                 [days, max_emails] = presets[type];
             }
-            
-            const response = await fetch('/api/admin', {
+            const res = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'generate',
-                    password: adminPassword,
-                    licenseData: { days, max_emails, type }
-                })
+                body: JSON.stringify({ action: 'generate', password: adminPassword, licenseData: { days, max_emails, type } })
             });
-            
-            const result = await response.json();
+            const result = await res.json();
             if (result.success) {
                 document.getElementById('licenseKeyDisplay').innerText = result.licenseKey;
                 document.getElementById('newLicense').style.display = 'block';
-                loadData();
+                loadLicenses();
             }
         }
         
-        async function deleteLicense(licenseKey) {
+        async function deleteLicense(key) {
             if (confirm('Delete this license?')) {
                 await fetch('/api/admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'delete',
-                        password: adminPassword,
-                        licenseData: { licenseKey }
-                    })
+                    body: JSON.stringify({ action: 'delete', password: adminPassword, licenseData: { licenseKey: key } })
                 });
-                loadData();
+                loadLicenses();
+            }
+        }
+        
+        async function loadTemplates() {
+            const res = await fetch('/api/templates');
+            const templates = await res.json();
+            const grid = document.getElementById('templatesGrid');
+            grid.innerHTML = '';
+            for (const [category, items] of Object.entries(templates)) {
+                for (const t of items) {
+                    grid.innerHTML += `
+                        <div class="template-card">
+                            <img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'">
+                            <div class="info">
+                                <h4>${t.name}</h4>
+                                <p>${t.title}</p>
+                                <p style="font-size:11px;color:#888;">${category} • ${t.variables?.length || 0} variables</p>
+                                ${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${category}','${t.id}')">Delete</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        async function deleteTemplate(category, id) {
+            if (confirm('Delete this template?')) {
+                await fetch('/api/templates', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, id, password: adminPassword })
+                });
+                loadTemplates();
+            }
+        }
+        
+        async function uploadTemplate() {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('templateName').value);
+            formData.append('category', document.getElementById('templateCategory').value);
+            formData.append('title', document.getElementById('templateTitle').value);
+            formData.append('html', document.getElementById('templateHtml').value);
+            formData.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v => v.trim())));
+            formData.append('password', adminPassword);
+            const imageFile = document.getElementById('templateImage').files[0];
+            if (imageFile) formData.append('image', imageFile);
+            
+            const res = await fetch('/api/templates', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert('Template uploaded!');
+                document.getElementById('templateName').value = '';
+                document.getElementById('templateTitle').value = '';
+                document.getElementById('templateHtml').value = '';
+                document.getElementById('templateVariables').value = '';
+                document.getElementById('templateImage').value = '';
+                loadTemplates();
+            } else {
+                alert('Upload failed');
             }
         }
         
         async function loadCollectedData() {
-            const response = await fetch('/api/admin', {
+            const res = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'getData', password: adminPassword })
             });
-            const result = await response.json();
-            
+            const result = await res.json();
             const tbody = document.querySelector('#dataTable tbody');
             tbody.innerHTML = '';
-            
             if (result.data) {
-                for (const item of result.data) {
-                    const row = tbody.insertRow();
-                    row.innerHTML = `
-                        <td>${new Date(item.timestamp).toLocaleString()}</td>
-                        <td>${item.userEmail || '-'}</td>
-                        <td>${item.ip || '-'}</td>
-                        <td>${item.location?.city || '-'}, ${item.location?.country || '-'}</td>
-                        <td>${item.browser?.substring(0, 50) || '-'}</td>
-                        <td>${item.platform || '-'}</td>
-                        <td>${item.license || '-'}</td>
+                for (const item of result.data.slice(0, 50)) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${new Date(item.timestamp).toLocaleString()}</td>
+                            <td>${item.userEmail || '-'}</td>
+                            <td>${item.ip || '-'}</td>
+                            <td>${item.location?.city || '-'}, ${item.location?.country || '-'}</td>
+                            <td>${item.browser?.substring(0, 40) || '-'}</td>
+                            <td>${item.license || '-'}</td>
+                        </tr>
                     `;
                 }
             }
         }
         
         async function loadStats() {
-            const response = await fetch('/api/admin', {
+            const res = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'list', password: adminPassword })
             });
-            const licenses = await response.json();
-            
+            const licenses = await res.json();
             const dataRes = await fetch('/api/admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -395,30 +503,27 @@
             });
             const collected = await dataRes.json();
             
-            let totalLicenses = Object.keys(licenses.licenses).length;
-            let activeLicenses = 0;
-            let totalEmailsSent = 0;
-            
+            let total = Object.keys(licenses.licenses).length;
+            let active = 0;
+            let sent = 0;
             for (const lic of Object.values(licenses.licenses)) {
-                if (lic.expiry >= new Date().toISOString().split('T')[0]) activeLicenses++;
-                totalEmailsSent += lic.used_count || 0;
+                if (lic.expiry >= new Date().toISOString().split('T')[0]) active++;
+                sent += lic.used_count || 0;
             }
             
             document.getElementById('statsCards').innerHTML = `
-                <div class="stat-card"><div class="stat-number">${totalLicenses}</div><div>Total Licenses</div></div>
-                <div class="stat-card"><div class="stat-number">${activeLicenses}</div><div>Active Licenses</div></div>
-                <div class="stat-card"><div class="stat-number">${totalEmailsSent}</div><div>Emails Sent</div></div>
+                <div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div>
+                <div class="stat-card"><div class="stat-number">${active}</div><div>Active Licenses</div></div>
+                <div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div>
                 <div class="stat-card"><div class="stat-number">${collected.data?.length || 0}</div><div>Users Tracked</div></div>
             `;
         }
         
         function copyLicense() {
-            const text = document.getElementById('licenseKeyDisplay').innerText;
-            navigator.clipboard.writeText(text);
-            alert('License copied!');
+            navigator.clipboard.writeText(document.getElementById('licenseKeyDisplay').innerText);
+            alert('Copied!');
         }
         
-        // Show/hide custom fields
         document.getElementById('licenseType').addEventListener('change', function() {
             document.getElementById('customFields').style.display = this.value === 'Custom' ? 'block' : 'none';
         });
