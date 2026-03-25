@@ -166,11 +166,16 @@
         button:hover {
             transform: scale(1.02);
         }
-        /* Admin Icon - Circle Button */
-        .admin-icon {
+        /* Bottom Icons */
+        .bottom-icons {
             position: fixed;
             bottom: 30px;
             right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 999;
+        }
+        .icon-circle {
             width: 55px;
             height: 55px;
             background: linear-gradient(135deg, #006a4e, #f42a41);
@@ -181,11 +186,11 @@
             cursor: pointer;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             transition: all 0.3s;
-            z-index: 999;
             color: white;
             font-size: 24px;
+            text-decoration: none;
         }
-        .admin-icon:hover {
+        .icon-circle:hover {
             transform: scale(1.1);
         }
         /* Modal */
@@ -205,11 +210,12 @@
             background: white;
             border-radius: 28px;
             padding: 30px;
-            width: 350px;
+            width: 400px;
+            max-width: 90%;
             text-align: center;
         }
-        .modal-content input {
-            margin: 15px 0;
+        .modal-content input, .modal-content textarea {
+            margin: 10px 0;
         }
         .toast {
             position: fixed;
@@ -256,9 +262,11 @@
     </style>
 </head>
 <body>
-    <!-- Admin Icon (Circle Button) -->
-    <div class="admin-icon" onclick="openAdminModal()">
-        👤
+    <!-- Bottom Icons: Admin + Telegram + Contact -->
+    <div class="bottom-icons">
+        <div class="icon-circle" onclick="openAdminModal()">👤</div>
+        <a href="https://t.me/CyperXPloit" target="_blank" class="icon-circle">📨</a>
+        <div class="icon-circle" onclick="openContactModal()">💬</div>
     </div>
 
     <!-- Admin Password Modal -->
@@ -268,6 +276,18 @@
             <input type="password" id="adminPassword" placeholder="Enter password">
             <button onclick="verifyAdmin()">Login</button>
             <p style="margin-top: 10px; font-size: 12px; color: #888;">Contact admin for password</p>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #006a4e;">💬 Contact Support</h2>
+            <input type="text" id="contactName" placeholder="Your Name">
+            <input type="email" id="contactEmail" placeholder="Your Email">
+            <textarea id="contactMessage" rows="4" placeholder="Describe your problem..."></textarea>
+            <button onclick="sendContact()">Send Message</button>
+            <p style="margin-top: 10px; font-size: 12px;">Or message directly on <a href="https://t.me/CyperXPloit" target="_blank">Telegram @CyperXPloit</a></p>
         </div>
     </div>
 
@@ -352,15 +372,12 @@
         let variableValues = {};
         let uploadedImageUrl = '';
         
-        // Load templates
         async function loadTemplates() {
             try {
                 const res = await fetch('/api/templates');
                 templates = await res.json();
                 renderTemplates();
-            } catch(e) {
-                console.error('Error loading templates:', e);
-            }
+            } catch(e) { console.error(e); }
         }
         
         function renderTemplates() {
@@ -376,7 +393,7 @@
                         <div class="info">
                             <h4>${t.name}</h4>
                             <p>${t.title}</p>
-                            <small style="color:#888;">${category}</small>
+                            <small>${category}</small>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -392,7 +409,6 @@
                 if (card) card.classList.add('selected');
             }
             
-            // Generate variable inputs
             const container = document.getElementById('variablesContainer');
             container.innerHTML = '<h3>✏️ Customize Content</h3>';
             variableValues = {};
@@ -413,7 +429,6 @@
                     updatePreview();
                 });
             }
-            
             updatePreview();
         }
         
@@ -424,7 +439,6 @@
                 const regex = new RegExp(`{{${key}}}`, 'g');
                 html = html.replace(regex, value);
             }
-            // Add uploaded image if exists
             if (uploadedImageUrl && html.includes('{{IMAGE}}')) {
                 html = html.replace(/{{IMAGE}}/g, uploadedImageUrl);
             }
@@ -461,7 +475,6 @@
             setTimeout(() => toast.remove(), 4000);
         }
         
-        // Load stats
         async function loadStats() {
             try {
                 const res = await fetch('/api/stats');
@@ -472,12 +485,9 @@
                     <div class="stat-item">📧 ${stats.totalEmails || 0} Emails Sent</div>
                     <div class="stat-item">👥 ${stats.totalUsers || 0} Users</div>
                 `;
-            } catch(e) {
-                console.error('Stats error:', e);
-            }
+            } catch(e) { console.error(e); }
         }
         
-        // Send email
         document.getElementById('sendBtn').addEventListener('click', async () => {
             const license = document.getElementById('license').value.trim();
             const name = document.getElementById('name').value.trim();
@@ -521,9 +531,12 @@
             }
         });
         
-        // Admin functions
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
+        }
+        
+        function openContactModal() {
+            document.getElementById('contactModal').style.display = 'flex';
         }
         
         function verifyAdmin() {
@@ -536,17 +549,42 @@
             }
         }
         
-        // Close modal when clicking outside
+        async function sendContact() {
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            if (!name || !email || !message) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            try {
+                await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+                showToast('✅ Message sent! I will reply soon.', 'success');
+                document.getElementById('contactModal').style.display = 'none';
+                document.getElementById('contactName').value = '';
+                document.getElementById('contactEmail').value = '';
+                document.getElementById('contactMessage').value = '';
+            } catch(e) {
+                showToast('Failed to send', 'error');
+            }
+        }
+        
         window.onclick = function(event) {
-            const modal = document.getElementById('adminModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
+            if (event.target === document.getElementById('adminModal')) {
+                document.getElementById('adminModal').style.display = 'none';
+            }
+            if (event.target === document.getElementById('contactModal')) {
+                document.getElementById('contactModal').style.display = 'none';
             }
         };
         
-        // Initialize
         loadTemplates();
         loadStats();
+        setInterval(loadStats, 30000);
     </script>
 </body>
 </html>
