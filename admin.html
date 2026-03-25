@@ -50,11 +50,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .live-stats {
             background: linear-gradient(135deg, #006a4e, #f42a41);
             color: white;
-            padding: 15px 25px;
+            padding: 10px 20px;
             border-radius: 40px;
             font-size: 14px;
         }
@@ -69,6 +71,7 @@
             background: white;
             border-radius: 30px;
             cursor: pointer;
+            transition: 0.3s;
         }
         .tab.active {
             background: linear-gradient(135deg, #006a4e, #f42a41);
@@ -97,19 +100,23 @@
         .stat-number { font-size: 32px; font-weight: bold; }
         input, select, textarea {
             width: 100%;
-            padding: 10px;
-            margin: 8px 0;
+            padding: 12px;
+            margin: 10px 0;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-family: inherit;
         }
         button {
             background: #006a4e;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
         }
+        button:hover { opacity: 0.9; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -119,7 +126,15 @@
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
-        .delete-btn { background: #f42a41; padding: 5px 10px; font-size: 12px; }
+        th { background: #f8fafc; }
+        .delete-btn { background: #f42a41; padding: 5px 12px; font-size: 12px; }
+        .license-code {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
         .template-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -137,21 +152,25 @@
         }
         .template-card .info { padding: 12px; }
         .visitor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .visitor-card {
             background: #f8fafc;
             padding: 15px;
             border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .visitor-card {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            flex: 1;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .visitor-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #006a4e;
+        }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .tab { font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
@@ -161,13 +180,15 @@
             <h2>🔐 Admin Access</h2>
             <input type="password" id="adminPass" placeholder="Enter password">
             <button onclick="login()">Login</button>
+            <p style="margin-top: 15px; font-size: 12px; color: #666;">Contact admin for password</p>
         </div>
     </div>
 
     <div id="dashboard" class="dashboard">
         <div class="header">
             <h1>📊 QuickMail Admin Panel</h1>
-            <div class="live-stats" id="liveVisitorStats">👥 Live: -- visitors</div>
+            <div class="live-stats" id="liveVisitorStats">👥 Loading...</div>
+            <button onclick="logout()" style="background:#f42a41;">🚪 Logout</button>
         </div>
 
         <div class="nav-tabs">
@@ -180,105 +201,448 @@
             <div class="tab" onclick="showTab('visitors')">👥 Visitors</div>
         </div>
 
+        <!-- Licenses Tab -->
         <div id="licensesTab" class="tab-content active">
             <h3>📋 All Licenses</h3>
-            <div style="overflow-x: auto;"><table id="licensesTable"><thead>(\s*<tr>)?<th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th>(\s*</tr>)?</thead><tbody></tbody></table></div>
+            <div style="overflow-x: auto;">
+                <table id="licensesTable">
+                    <thead>
+                        <tr><th>License Key</th><th>Type</th><th>Created</th><th>Expiry</th><th>Max Emails</th><th>Used</th><th>Used By</th><th>Action</th> </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- Generate License Tab -->
         <div id="generateTab" class="tab-content">
-            <h3>✨ Generate License</h3>
+            <h3>✨ Generate New License</h3>
             <div class="stats-grid">
                 <div class="stat-card"><div class="stat-number">7-365</div><div>Days</div></div>
                 <div class="stat-card"><div class="stat-number">10-∞</div><div>Email Limit</div></div>
             </div>
-            <select id="licenseType">
-                <option value="Trial">Trial (7 days, 10 emails)</option>
-                <option value="Monthly">Monthly (30 days, 100 emails)</option>
-                <option value="Premium">Premium (90 days, 500 emails)</option>
-                <option value="Pro">Pro (180 days, 2000 emails)</option>
-                <option value="Lifetime">Lifetime (365 days, Unlimited)</option>
-                <option value="Custom">Custom</option>
-            </select>
-            <div id="customFields" style="display:none;">
-                <input type="number" id="customDays" placeholder="Days">
-                <select id="customMaxEmails"><option value="10">10</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="1000">1000</option><option value="unlimited">Unlimited</option></select>
+            
+            <div style="margin: 20px 0;">
+                <label>License Type:</label>
+                <select id="licenseType" onchange="toggleCustomFields()">
+                    <option value="Trial">📀 Trial (7 days, 10 emails)</option>
+                    <option value="Monthly">📅 Monthly (30 days, 100 emails)</option>
+                    <option value="Premium">⭐ Premium (90 days, 500 emails)</option>
+                    <option value="Pro">💎 Pro (180 days, 2000 emails)</option>
+                    <option value="Lifetime">👑 Lifetime (365 days, Unlimited)</option>
+                    <option value="Custom">🎨 Custom</option>
+                </select>
             </div>
-            <button onclick="generateLicense()">🔑 Generate License</button>
-            <div id="newLicense" style="margin-top:20px;padding:15px;background:#e8f5e9;border-radius:12px;display:none;"><strong>✅ New License!</strong><br><code id="licenseKeyDisplay"></code><button onclick="copyLicense()">Copy</button></div>
+            
+            <div id="customFields" style="display: none;">
+                <label>Days:</label>
+                <input type="number" id="customDays" value="30" placeholder="Number of days">
+                <label>Max Emails:</label>
+                <select id="customMaxEmails">
+                    <option value="10">10 emails/day</option>
+                    <option value="50">50 emails/day</option>
+                    <option value="100">100 emails/day</option>
+                    <option value="500">500 emails/day</option>
+                    <option value="1000">1000 emails/day</option>
+                    <option value="5000">5000 emails/day</option>
+                    <option value="unlimited">Unlimited</option>
+                </select>
+            </div>
+            
+            <button onclick="generateLicense()" style="width: 100%; margin-top: 20px;">🔑 Generate License</button>
+            
+            <div id="newLicense" style="margin-top: 20px; padding: 20px; background: #e8f5e9; border-radius: 12px; display: none;">
+                <strong>✅ License Created Successfully!</strong><br><br>
+                <code id="licenseKeyDisplay" style="font-size: 18px; background: white; padding: 8px; display: inline-block; border-radius: 8px;"></code>
+                <br><br>
+                <button onclick="copyLicense()">📋 Copy License Key</button>
+                <button onclick="closeLicenseDisplay()" style="background: #666;">Close</button>
+            </div>
         </div>
 
+        <!-- Templates Tab -->
         <div id="templatesTab" class="tab-content">
             <h3>🎨 All Templates</h3>
             <div id="templatesGrid" class="template-grid"></div>
         </div>
 
+        <!-- Upload Template Tab -->
         <div id="uploadTab" class="tab-content">
             <h3>📤 Upload Custom Template</h3>
             <input type="text" id="templateName" placeholder="Template Name">
-            <select id="templateCategory"><option value="business">Business</option><option value="marketing">Marketing</option><option value="personal">Personal</option><option value="ecommerce">E-Commerce</option><option value="custom">Custom</option></select>
+            <select id="templateCategory">
+                <option value="business">Business</option>
+                <option value="marketing">Marketing</option>
+                <option value="personal">Personal</option>
+                <option value="ecommerce">E-Commerce</option>
+                <option value="custom">Custom</option>
+            </select>
             <input type="text" id="templateTitle" placeholder="Title/Description">
             <input type="file" id="templateImage" accept="image/*">
-            <textarea id="templateHtml" rows="10" placeholder="HTML template code..."></textarea>
+            <textarea id="templateHtml" rows="8" placeholder="HTML template code..."></textarea>
             <input type="text" id="templateVariables" placeholder="Variables (comma separated): NAME, EMAIL, LINK">
-            <button onclick="uploadTemplate()">📤 Upload</button>
+            <button onclick="uploadTemplate()">📤 Upload Template</button>
         </div>
 
+        <!-- Collected Data Tab -->
         <div id="dataTab" class="tab-content">
-            <h3>📁 Collected Data</h3>
-            <div style="overflow-x: auto;"><table id="dataTable"><thead><tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>License</th></tr></thead><tbody></tbody></table></div>
+            <h3>📁 Collected User Data</h3>
+            <div style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead><tr><th>Date</th><th>Email</th><th>IP</th><th>Location</th><th>Browser</th><th>License</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- Statistics Tab -->
         <div id="statsTab" class="tab-content">
             <h3>📈 Statistics</h3>
             <div id="statsCards" class="stats-grid"></div>
         </div>
 
+        <!-- Visitors Tab -->
         <div id="visitorsTab" class="tab-content">
             <h3>👥 Visitor Statistics</h3>
             <div class="visitor-stats" id="visitorStats">
-                <div class="visitor-card"><h3>Today</h3><div id="todayVisitors" class="stat-number">0</div></div>
-                <div class="visitor-card"><h3>This Week</h3><div id="weekVisitors" class="stat-number">0</div></div>
-                <div class="visitor-card"><h3>This Month</h3><div id="monthVisitors" class="stat-number">0</div></div>
-                <div class="visitor-card"><h3>Total All Time</h3><div id="totalVisitors" class="stat-number">0</div></div>
+                <div class="visitor-card"><div class="number" id="todayVisitors">0</div><div>Today</div></div>
+                <div class="visitor-card"><div class="number" id="weekVisitors">0</div><div>This Week</div></div>
+                <div class="visitor-card"><div class="number" id="monthVisitors">0</div><div>This Month</div></div>
+                <div class="visitor-card"><div class="number" id="totalVisitors">0</div><div>Total All Time</div></div>
+                <div class="visitor-card"><div class="number" id="onlineVisitors">0</div><div>Online Now</div></div>
             </div>
-            <div style="margin-top:20px;">
-                <h4>Recent Visitors</h4>
-                <div style="overflow-x: auto;"><table id="visitorTable"><thead><tr><th>Time</th><th>IP</th><th>Location</th><th>Page</th></tr></thead><tbody></tbody></table></div>
+            <h4>Recent Visitors</h4>
+            <div style="overflow-x: auto;">
+                <table id="visitorTable">
+                    <thead><tr><th>Time</th><th>IP</th><th>Location</th><th>Page</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
         let adminPassword = '';
-        function login() { const pass = document.getElementById('adminPass').value; if (pass === '##Hossain##1') { adminPassword = pass; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadAll(); setInterval(loadLiveVisitorStats, 5000); } else alert('Wrong password!'); }
-        function logout() { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('dashboard').style.display = 'none'; }
-        function showTab(tab) { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); document.getElementById(tab+'Tab').classList.add('active'); if(tab==='templates') loadTemplates(); if(tab==='data') loadCollectedData(); if(tab==='stats') loadStats(); if(tab==='visitors') loadVisitors(); }
         
-        async function loadAll() { await loadLicenses(); await loadTemplates(); await loadCollectedData(); await loadStats(); await loadVisitors(); await loadLiveVisitorStats(); }
+        function login() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === '##Hossain##1') {
+                adminPassword = pass;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadAll();
+                setInterval(loadLiveVisitorStats, 10000);
+            } else {
+                alert('Wrong password!');
+            }
+        }
         
-        async function loadLicenses() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) }); const data = await res.json(); const tbody = document.querySelector('#licensesTable tbody'); tbody.innerHTML = ''; for(const [key,lic] of Object.entries(data.licenses)) { tbody.innerHTML += `<tr><td><code>${key}</code></td><td>${lic.type}</td><td>${lic.created?.split('T')[0]||'-'}</td><td>${lic.expiry}</td><td>${lic.max_emails===-1?'∞':lic.max_emails}</td><td>${lic.used_count||0}</td><td>${lic.used_by||'-'}</td><td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button>uche`; } }
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
         
-        async function generateLicense() { const type = document.getElementById('licenseType').value; let days, max_emails; if(type==='Custom') { days = document.getElementById('customDays').value; max_emails = document.getElementById('customMaxEmails').value; } else { const p = { 'Trial':[7,10], 'Monthly':[30,100], 'Premium':[90,500], 'Pro':[180,2000], 'Lifetime':[365,'unlimited'] }; [days,max_emails] = p[type]; } const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'generate', password:adminPassword, licenseData:{ days, max_emails, type } }) }); const result = await res.json(); if(result.success) { document.getElementById('licenseKeyDisplay').innerText = result.licenseKey; document.getElementById('newLicense').style.display = 'block'; loadLicenses(); } }
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            if (tab === 'templates') loadTemplates();
+            if (tab === 'data') loadCollectedData();
+            if (tab === 'stats') loadStats();
+            if (tab === 'visitors') loadVisitors();
+        }
         
-        async function deleteLicense(key) { if(confirm('Delete?')) { await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'delete', password:adminPassword, licenseData:{ licenseKey:key } }) }); loadLicenses(); } }
+        function toggleCustomFields() {
+            const type = document.getElementById('licenseType').value;
+            document.getElementById('customFields').style.display = type === 'Custom' ? 'block' : 'none';
+        }
         
-        async function loadTemplates() { const res = await fetch('/api/templates'); const templates = await res.json(); const grid = document.getElementById('templatesGrid'); grid.innerHTML = ''; for(const [cat, items] of Object.entries(templates)) { for(const t of items) { grid.innerHTML += `<div class="template-card"><img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'"><div class="info"><h4>${t.name}</h4><p>${t.title}</p><small>${cat}</small>${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${cat}','${t.id}')">Delete</button>` : ''}</div></div>`; } } }
+        async function generateLicense() {
+            const type = document.getElementById('licenseType').value;
+            let days, max_emails;
+            
+            if (type === 'Custom') {
+                days = document.getElementById('customDays').value;
+                max_emails = document.getElementById('customMaxEmails').value;
+            } else {
+                const presets = {
+                    'Trial': [7, 10],
+                    'Monthly': [30, 100],
+                    'Premium': [90, 500],
+                    'Pro': [180, 2000],
+                    'Lifetime': [365, 'unlimited']
+                };
+                [days, max_emails] = presets[type];
+            }
+            
+            if (!days || days < 1) {
+                alert('Please enter valid days');
+                return;
+            }
+            
+            const loading = document.getElementById('newLicense');
+            loading.style.display = 'block';
+            loading.innerHTML = '<strong>⏳ Generating license...</strong>';
+            
+            try {
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate',
+                        password: adminPassword,
+                        licenseData: { days, max_emails, type }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('licenseKeyDisplay').innerText = result.licenseKey;
+                    document.getElementById('newLicense').innerHTML = `
+                        <strong>✅ License Created Successfully!</strong><br><br>
+                        <code id="licenseKeyDisplay" style="font-size: 18px; background: white; padding: 8px; display: inline-block; border-radius: 8px;">${result.licenseKey}</code>
+                        <br><br>
+                        <p><strong>Expires:</strong> ${result.expiry}</p>
+                        <p><strong>Max Emails:</strong> ${result.max_emails === 'unlimited' ? 'Unlimited' : result.max_emails + ' emails'}</p>
+                        <br>
+                        <button onclick="copyLicense()">📋 Copy License Key</button>
+                        <button onclick="closeLicenseDisplay()" style="background: #666;">Close</button>
+                    `;
+                    await loadLicenses();
+                    await loadStats();
+                } else {
+                    document.getElementById('newLicense').innerHTML = `
+                        <strong style="color: red;">❌ Failed to generate license</strong><br>
+                        <p>${result.error || 'Unknown error'}</p>
+                        <br>
+                        <button onclick="closeLicenseDisplay()">Close</button>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('newLicense').innerHTML = `
+                    <strong style="color: red;">❌ Error: ${error.message}</strong><br>
+                    <button onclick="closeLicenseDisplay()">Close</button>
+                `;
+            }
+        }
         
-        async function deleteTemplate(cat,id) { if(confirm('Delete template?')) { await fetch('/api/templates', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ category:cat, id, password:adminPassword }) }); loadTemplates(); } }
+        function closeLicenseDisplay() {
+            document.getElementById('newLicense').style.display = 'none';
+        }
         
-        async function uploadTemplate() { const fd = new FormData(); fd.append('name', document.getElementById('templateName').value); fd.append('category', document.getElementById('templateCategory').value); fd.append('title', document.getElementById('templateTitle').value); fd.append('html', document.getElementById('templateHtml').value); fd.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v=>v.trim()))); fd.append('password', adminPassword); const img = document.getElementById('templateImage').files[0]; if(img) fd.append('image', img); const res = await fetch('/api/templates', { method:'POST', body:fd }); const result = await res.json(); if(result.success) { alert('Template uploaded!'); loadTemplates(); } else alert('Upload failed'); }
+        function copyLicense() {
+            const text = document.getElementById('licenseKeyDisplay').innerText;
+            navigator.clipboard.writeText(text);
+            alert('License copied to clipboard!');
+        }
         
-        async function loadCollectedData() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'getData', password:adminPassword }) }); const result = await res.json(); const tbody = document.querySelector('#dataTable tbody'); tbody.innerHTML = ''; if(result.data) { for(const item of result.data.slice(0,50)) { tbody.innerHTML += `(\s*<tr>)?<td>${new Date(item.timestamp).toLocaleString()}</td><td>${item.userEmail||'-'}</td><td>${item.ip||'-'}</td><td>${item.location?.city||'-'}, ${item.location?.country||'-'}</td><td>${item.browser?.substring(0,40)||'-'}</td><td>${item.license||'-'}</td>(\s*</tr>)?`; } } }
+        async function loadLicenses() {
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'list', password: adminPassword })
+                });
+                const data = await res.json();
+                const tbody = document.querySelector('#licensesTable tbody');
+                tbody.innerHTML = '';
+                for (const [key, lic] of Object.entries(data.licenses || {})) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><code class="license-code">${key}</code></td>
+                            <td>${lic.type}</td>
+                            <td>${lic.created?.split('T')[0] || '-'}</td>
+                            <td>${lic.expiry}</td>
+                            <td>${lic.max_emails === -1 ? '∞' : lic.max_emails}</td>
+                            <td>${lic.used_count || 0}</td>
+                            <td>${lic.used_by || '-'}</td>
+                            <td><button class="delete-btn" onclick="deleteLicense('${key}')">Delete</button></td>
+                        </tr>
+                    `;
+                }
+            } catch (e) {
+                console.error('Load licenses error:', e);
+            }
+        }
         
-        async function loadStats() { const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'list', password:adminPassword }) }); const licenses = await res.json(); const dataRes = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'getData', password:adminPassword }) }); const collected = await dataRes.json(); let total=0, active=0, sent=0; for(const lic of Object.values(licenses.licenses)) { total++; if(lic.expiry >= new Date().toISOString().split('T')[0]) active++; sent += lic.used_count||0; } document.getElementById('statsCards').innerHTML = `<div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div><div class="stat-card"><div class="stat-number">${active}</div><div>Active</div></div><div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div><div class="stat-card"><div class="stat-number">${collected.data?.length||0}</div><div>Users Tracked</div></div>`; }
+        async function deleteLicense(key) {
+            if (confirm('Delete this license? This action cannot be undone.')) {
+                await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', password: adminPassword, licenseData: { licenseKey: key } })
+                });
+                await loadLicenses();
+                await loadStats();
+            }
+        }
         
-        async function loadVisitors() { const res = await fetch('/api/visitors'); const data = await res.json(); document.getElementById('todayVisitors').innerText = data.today || 0; document.getElementById('weekVisitors').innerText = data.week || 0; document.getElementById('monthVisitors').innerText = data.month || 0; document.getElementById('totalVisitors').innerText = data.total || 0; const tbody = document.querySelector('#visitorTable tbody'); tbody.innerHTML = ''; if(data.recent) { for(const v of data.recent.slice(0,20)) { tbody.innerHTML += `(\s*<tr>)?<td>${new Date(v.time).toLocaleString()}</td><td>${v.ip}</td><td>${v.location||'-'}</td><td>${v.page}</td>(\s*</tr>)?`; } } }
+        async function loadTemplates() {
+            try {
+                const res = await fetch('/api/templates');
+                const templates = await res.json();
+                const grid = document.getElementById('templatesGrid');
+                grid.innerHTML = '';
+                for (const [cat, items] of Object.entries(templates)) {
+                    for (const t of items) {
+                        grid.innerHTML += `
+                            <div class="template-card">
+                                <img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'">
+                                <div class="info">
+                                    <h4>${t.name}</h4>
+                                    <p>${t.title}</p>
+                                    <small style="color:#666;">${cat}</small>
+                                    ${t.custom ? `<button class="delete-btn" onclick="deleteTemplate('${cat}','${t.id}')" style="margin-top:8px;">Delete</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (e) {
+                console.error('Load templates error:', e);
+            }
+        }
         
-        async function loadLiveVisitorStats() { const res = await fetch('/api/visitors'); const data = await res.json(); document.getElementById('liveVisitorStats').innerHTML = `👥 Live: ${data.online || 0} visitors online`; }
+        async function deleteTemplate(cat, id) {
+            if (confirm('Delete this template?')) {
+                await fetch('/api/templates', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category: cat, id, password: adminPassword })
+                });
+                await loadTemplates();
+            }
+        }
         
-        function copyLicense() { navigator.clipboard.writeText(document.getElementById('licenseKeyDisplay').innerText); alert('Copied!'); }
+        async function uploadTemplate() {
+            const fd = new FormData();
+            fd.append('name', document.getElementById('templateName').value);
+            fd.append('category', document.getElementById('templateCategory').value);
+            fd.append('title', document.getElementById('templateTitle').value);
+            fd.append('html', document.getElementById('templateHtml').value);
+            fd.append('variables', JSON.stringify(document.getElementById('templateVariables').value.split(',').map(v => v.trim())));
+            fd.append('password', adminPassword);
+            const img = document.getElementById('templateImage').files[0];
+            if (img) fd.append('image', img);
+            
+            const res = await fetch('/api/templates', { method: 'POST', body: fd });
+            const result = await res.json();
+            if (result.success) {
+                alert('Template uploaded successfully!');
+                document.getElementById('templateName').value = '';
+                document.getElementById('templateTitle').value = '';
+                document.getElementById('templateHtml').value = '';
+                document.getElementById('templateVariables').value = '';
+                document.getElementById('templateImage').value = '';
+                await loadTemplates();
+            } else {
+                alert('Upload failed: ' + (result.error || 'Unknown error'));
+            }
+        }
         
-        document.getElementById('licenseType').addEventListener('change', function() { document.getElementById('customFields').style.display = this.value === 'Custom' ? 'block' : 'none'; });
+        async function loadCollectedData() {
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getData', password: adminPassword })
+                });
+                const result = await res.json();
+                const tbody = document.querySelector('#dataTable tbody');
+                tbody.innerHTML = '';
+                if (result.data) {
+                    for (const item of result.data.slice(0, 50)) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${new Date(item.timestamp).toLocaleString()}</td>
+                                <td>${item.userEmail || '-'}</td>
+                                <td>${item.ip || '-'}</td>
+                                <td>${item.location?.city || '-'}, ${item.location?.country || '-'}</td>
+                                <td>${item.browser?.substring(0, 40) || '-'}</td>
+                                <td>${item.license || '-'}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            } catch (e) {
+                console.error('Load data error:', e);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'list', password: adminPassword })
+                });
+                const data = await res.json();
+                let total = 0, active = 0, sent = 0;
+                for (const lic of Object.values(data.licenses || {})) {
+                    total++;
+                    if (lic.expiry >= new Date().toISOString().split('T')[0]) active++;
+                    sent += lic.used_count || 0;
+                }
+                document.getElementById('statsCards').innerHTML = `
+                    <div class="stat-card"><div class="stat-number">${total}</div><div>Total Licenses</div></div>
+                    <div class="stat-card"><div class="stat-number">${active}</div><div>Active Licenses</div></div>
+                    <div class="stat-card"><div class="stat-number">${sent}</div><div>Emails Sent</div></div>
+                `;
+            } catch (e) {
+                console.error('Stats error:', e);
+            }
+        }
+        
+        async function loadVisitors() {
+            try {
+                const res = await fetch('/api/visitors');
+                const data = await res.json();
+                document.getElementById('todayVisitors').innerText = data.today || 0;
+                document.getElementById('weekVisitors').innerText = data.week || 0;
+                document.getElementById('monthVisitors').innerText = data.month || 0;
+                document.getElementById('totalVisitors').innerText = data.total || 0;
+                document.getElementById('onlineVisitors').innerText = data.online || 0;
+                
+                const tbody = document.querySelector('#visitorTable tbody');
+                tbody.innerHTML = '';
+                if (data.recent) {
+                    for (const v of data.recent.slice(0, 20)) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${new Date(v.time).toLocaleString()}</td>
+                                <td>${v.ip}</td>
+                                <td>${v.location || '-'}</td>
+                                <td>${v.page || '/'}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            } catch (e) {
+                console.error('Visitors error:', e);
+            }
+        }
+        
+        async function loadLiveVisitorStats() {
+            try {
+                const res = await fetch('/api/visitors');
+                const data = await res.json();
+                document.getElementById('liveVisitorStats').innerHTML = `👥 ${data.online || 0} visitors online`;
+            } catch (e) {}
+        }
+        
+        async function loadAll() {
+            await loadLicenses();
+            await loadTemplates();
+            await loadCollectedData();
+            await loadStats();
+            await loadVisitors();
+            await loadLiveVisitorStats();
+        }
+        
+        // Initialize
+        toggleCustomFields();
     </script>
 </body>
 </html>
