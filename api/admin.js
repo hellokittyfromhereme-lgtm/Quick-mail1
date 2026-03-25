@@ -1,28 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Supabase Configuration
 const supabaseUrl = 'https://dibssmtdcishobpdvftg.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYnNzbXRkY2lzaG9icGR2ZnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjQ4OTgsImV4cCI6MjA5MDAwMDg5OH0.lkXURp2-BjAd1AAsR78Vpfpeps0pUYCUz_JnQbmoJRc';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-import fs from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const LICENSE_FILE = path.join(DATA_DIR, 'licenses.json');
-const COLLECTED_DIR = path.join(DATA_DIR, 'collected');
-
-// Ensure directories exist
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(LICENSE_FILE)) {
-  fs.writeFileSync(LICENSE_FILE, JSON.stringify({}));
-}
-if (!fs.existsSync(COLLECTED_DIR)) {
-  fs.mkdirSync(COLLECTED_DIR, { recursive: true });
-}
-
 const ADMIN_PASSWORD = '##Hossain##1';
 
 export default async function handler(req, res) {
@@ -31,19 +13,17 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  // Handle preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   
-  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
   const { action, password, licenseData } = req.body;
   
-  // Verify password
+  // Verify admin password
   if (password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -63,31 +43,22 @@ export default async function handler(req, res) {
       expiry.setDate(expiry.getDate() + parseInt(days));
       const expiryDate = expiry.toISOString().split('T')[0];
       
-      // Load existing licenses
-      let licenses = {};
-      try {
-        const fileContent = fs.readFileSync(LICENSE_FILE, 'utf8');
-        licenses = JSON.parse(fileContent);
-      } catch (err) {
-        licenses = {};
+      // Insert into Supabase
+      const { error } = await supabase
+        .from('licenses')
+        .insert({
+          license_key: licenseKey,
+          type: type,
+          expiry: expiryDate,
+          max_emails: max_emails === 'unlimited' ? -1 : parseInt(max_emails),
+          days: parseInt(days),
+          used_count: 0
+        });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({ error: error.message });
       }
-      
-      // Add new license
-      licenses[licenseKey] = {
-        type: type,
-        created: new Date().toISOString(),
-        expiry: expiryDate,
-        max_emails: max_emails === 'unlimited' ? -1 : parseInt(max_emails),
-        days: parseInt(days),
-        used_count: 0,
-        used_by: null,
-        last_used: null
-      };
-      
-      // Save to file
-      fs.writeFileSync(LICENSE_FILE, JSON.stringify(licenses, null, 2));
-      
-      console.log('License generated:', licenseKey);
       
       return res.status(200).json({
         success: true,
@@ -99,25 +70,37 @@ export default async function handler(req, res) {
       
     } catch (error) {
       console.error('Generate error:', error);
-      return res.status(500).json({ 
-        error: 'Failed to generate license: ' + error.message 
-      });
+      return res.status(500).json({ error: error.message });
     }
   }
   
   // ============ LIST LICENSES ============
   if (action === 'list') {
     try {
-      let licenses = {};
-      try {
-        const fileContent = fs.readFileSync(LICENSE_FILE, 'utf8');
-        licenses = JSON.parse(fileContent);
-      } catch (err) {
-        licenses = {};
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .order('created', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Convert to object format for frontend compatibility
+      const licenses = {};
+      for (const item of data) {
+        licenses[item.license_key] = {
+          type: item.type,
+          created: item.created,
+          expiry: item.expiry,
+          max_emails: item.max_emails,
+          used_count: item.used_count,
+          used_by: item.used_by,
+          last_used: item.last_used
+        };
       }
+      
       return res.status(200).json({ licenses });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to load licenses' });
+      return res.status(500).json({ error: error.message });
     }
   }
   
@@ -125,37 +108,31 @@ export default async function handler(req, res) {
   if (action === 'delete') {
     try {
       const { licenseKey } = licenseData;
-      let licenses = {};
-      try {
-        const fileContent = fs.readFileSync(LICENSE_FILE, 'utf8');
-        licenses = JSON.parse(fileContent);
-      } catch (err) {
-        licenses = {};
-      }
+      const { error } = await supabase
+        .from('licenses')
+        .delete()
+        .eq('license_key', licenseKey);
       
-      delete licenses[licenseKey];
-      fs.writeFileSync(LICENSE_FILE, JSON.stringify(licenses, null, 2));
-      
+      if (error) throw error;
       return res.status(200).json({ success: true });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to delete license' });
+      return res.status(500).json({ error: error.message });
     }
   }
   
   // ============ GET COLLECTED DATA ============
   if (action === 'getData') {
     try {
-      const files = fs.readdirSync(COLLECTED_DIR);
-      const data = [];
-      for (const file of files) {
-        try {
-          const content = fs.readFileSync(path.join(COLLECTED_DIR, file), 'utf8');
-          data.push(JSON.parse(content));
-        } catch (e) {}
-      }
-      return res.status(200).json({ data: data.reverse() });
+      const { data, error } = await supabase
+        .from('collected_data')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(100);
+      
+      if (error) throw error;
+      return res.status(200).json({ data });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to load data' });
+      return res.status(500).json({ error: error.message });
     }
   }
   
