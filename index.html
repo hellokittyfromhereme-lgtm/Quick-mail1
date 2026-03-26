@@ -15,7 +15,6 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
             background: #0a0a0a;
             position: relative;
             overflow-x: hidden;
@@ -501,6 +500,25 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -542,6 +560,16 @@
             .logo {
                 font-size: 32px;
             }
+            .bottom-icons {
+                bottom: 15px;
+                right: 15px;
+                gap: 10px;
+            }
+            .icon-circle {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -566,6 +594,9 @@
         <div class="icon-circle" onclick="openContactModal()">
             <i class="fas fa-headset"></i>
         </div>
+        <a href="/my_data.html" class="icon-circle">
+            <i class="fas fa-chart-line"></i>
+        </a>
     </div>
 
     <!-- Admin Modal -->
@@ -670,6 +701,12 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Footer with Dashboard Link -->
+        <div class="footer">
+            <p>⚡ Powered by QuickMail • Made in Bangladesh 🇧🇩</p>
+            <p>📊 <a href="/my_data.html"><i class="fas fa-chart-line"></i> My Dashboard - See who clicked your emails</a></p>
+        </div>
     </div>
 
     <script>
@@ -713,7 +750,7 @@
                     card.className = 'template-card';
                     card.onclick = () => selectTemplate(t);
                     card.innerHTML = `
-                        <img src="${t.image}" onerror="this.src='https://via.placeholder.com/600x300/006a4e/white?text=Template'">
+                        <img src="${t.image}" onerror="this.src='https://placehold.co/600x300/006a4e/white?text=Template'">
                         <div class="info">
                             <h4>${t.name}</h4>
                             <p>${t.title}</p>
@@ -852,6 +889,7 @@
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
                 showToast('Network error!', 'error');
+                console.error(error);
             }
         });
 

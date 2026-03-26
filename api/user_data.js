@@ -6,6 +6,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -19,29 +20,25 @@ export default async function handler(req, res) {
   }
   
   try {
-    const userData = req.body;
+    const { email } = req.body;
     
-    // Save to Supabase with sender_email (who sent the email)
-    const { error } = await supabase
+    if (!email) {
+      return res.status(400).json({ error: 'Email required' });
+    }
+    
+    // Get data where sender_email matches
+    const { data, error } = await supabase
       .from('collected_data')
-      .insert({
-        tracking_id: userData.trackingId,
-        user_email: userData.userEmail,        // receiver email
-        sender_email: userData.senderEmail,     // who sent the email (IMPORTANT!)
-        license: userData.license,
-        ip: userData.ip,
-        location: userData.location,
-        browser: userData.browser,
-        platform: userData.platform,
-        timestamp: userData.timestamp || new Date().toISOString()
-      });
+      .select('*')
+      .eq('sender_email', email)
+      .order('timestamp', { ascending: false });
     
     if (error) {
       console.error('Supabase error:', error);
       return res.status(500).json({ error: error.message });
     }
     
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ data: data || [] });
     
   } catch (error) {
     console.error('Error:', error);
